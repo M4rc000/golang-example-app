@@ -9,6 +9,7 @@ import (
 
 func RunApp() {
 	app := gin.Default()
+	app.LoadHTMLGlob("views/**/*")
 
 	app.GET("/users", controllers.GetUsers)
 	// app.POST("/", controllers.CreateUser)

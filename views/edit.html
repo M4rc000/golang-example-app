@@ -1,0 +1,10 @@
+{{ define "content" }}
+<form action="/users/update/{{ .user.ID }}" method="POST">
+    <input type="hidden" name="ID" value="{{ .user.ID }}">
+    <label>Name:</label>
+    <input type="text" name="Name" value="{{ .user.Name }}" required>
+    <label>Email:</label>
+    <input type="email" name="Email" value="{{ .user.Email }}" required>
+    <button type="submit">Update</button>
+</form>
+{{ end }}

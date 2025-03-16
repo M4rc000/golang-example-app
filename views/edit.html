@@ -1,10 +1,56 @@
-{{ define "content" }}
-<form action="/users/update/{{ .user.ID }}" method="POST">
-    <input type="hidden" name="ID" value="{{ .user.ID }}">
-    <label>Name:</label>
-    <input type="text" name="Name" value="{{ .user.Name }}" required>
-    <label>Email:</label>
-    <input type="email" name="Email" value="{{ .user.Email }}" required>
-    <button type="submit">Update</button>
-</form>
-{{ end }}
+{{ template "header.html" .}}
+
+<div class="container mt-3">
+    <div class="card">
+        <div class="card-content">
+            <form action="/users/update/{{ .user.ID }}" method="POST">
+                <div class="card-header">
+                    Update User
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label for="Id" class="col-sm-2 col-form-label">ID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Id" name="Id" value="{{ .user.Id }}" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="Name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Name" name="Name" value="{{ .user.Name }}">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="Username" class="col-sm-2 col-form-label">Username</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Username" name="Username" value="{{ .user.Username }}">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="Gender" class="col-sm-2 col-form-label">Gender</label>
+                        <div class="col-sm-10">
+                            <select class="form-select" aria-label="Gender Select" id="Gender" name="Gender">
+                                <option value="" {{ if eq .user.Gender "" }}selected{{ end }}>Choose a Gender</option>
+                                <option value="Male" {{ if eq .user.Gender "Male" }}selected{{ end }}>Male</option>
+                                <option value="Female" {{ if eq .user.Gender "Female" }}selected{{ end }}>Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="Email" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Email" name="Email" value="{{ .user.Email }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/" class="btn btn-primary">Back</a>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{ template "script.html" }}
+{{ template "footer.html" }}

@@ -8,4 +8,5 @@ import (
 func main() {
 	config.ConnectionDB()
 	routes.RunApp()
+	//config.Migrate()
 }

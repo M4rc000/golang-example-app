@@ -1,22 +1,92 @@
+    {{ template "header.html" .}}
 
-{{ define "layouts/main.html" }}
-<a href="/users/create">Create User</a>
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Actions</th>
-    </tr>
-    {{ range .users }}
-    <tr>
-        <td>{{ .Id }}</td>
-        <td>{{ .Name }}</td>
-        <td>{{ .Email }}</td>
-        <td>
-            <a href="/users/edit/{{ .ID }}">Edit</a>
-            <a href="/users/delete/{{ .ID }}">Delete</a>
-        </td>
-    </tr>
-</table>
-{{ end }}
+    <div class="container mt-3">
+        {{ if .successMessage }}
+            <div class="alert alert-success mt-3">{{ .successMessage }}</div>
+        {{ end }}
+
+        {{ if .errorMessage }}
+            <div class="alert alert-danger mt-3">{{ .errorMessage }}</div>
+        {{ end }}
+
+        {{ if .failedMessage }}
+            <div class="alert alert-danger mt-3">{{ .failedMessage }}</div>
+        {{ end }}
+
+        <h1 class="mt-2">User Management</h1>
+        <div class="card">
+            <div class="card-content">
+                <div class="card-header">
+                    <a class="btn btn-primary" href="/users/create">
+                        Create User
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered" border="1">
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Active</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        {{ range .users }}
+                        <tr>
+                            <td class="text-center">{{ .Number }}</td>
+                            <td>{{ .Name }}</td>
+                            <td>{{ .Email }}</td>
+                            <td class="text-center">
+                                {{ if eq .IsActive "0" }}<i class="bi bi-x-circle-fill" style="color: red"></i>{{ end }}
+                                {{ if eq .IsActive "1" }}<i class="bi bi-check-circle-fill" style="color: darkblue"></i>{{ end }}
+                            </td>
+                            <td class="text-center">
+                                <a class="badge text-bg-success text-white" href="/users/show/{{ .Id }}" style="text-decoration: none">Show</a>
+                                <a class="badge text-bg-warning text-white" href="/users/edit/{{ .Id }}" style="text-decoration: none">Edit</a>
+                                <a class="badge text-bg-danger text-white" href="/users/delete/{{ .Id }}" style ="text-decoration: none">Delete</a>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ template "script.html" }}
+
+    <script>
+        $(document).ready(function() {
+            let failedCreate = `{{ .FAILED_CREATE }}`;
+            let successCreate = `{{ .SUCCESS_CREATE }}`;
+            let Error = "{{ .Error }}";
+
+            console.log("Success: ", successCreate);
+            console.log("Failed: ", failedCreate);
+
+            if (failedCreate) {
+                Swal.fire({
+                    title: "Error!",
+                    text: failedCreate,
+                    icon: "error"
+                });
+            }
+
+            if (successCreate) {
+                Swal.fire({
+                    title: "Success!",
+                    text: successCreate,
+                    icon: "success"
+                });
+            }
+
+            if (Error){
+                Swal.fire({
+                    title: "Error!",
+                    text: Error,
+                    icon: "error"
+                });
+            }
+        });
+    </script>
+
+    {{ template "footer.html" }}

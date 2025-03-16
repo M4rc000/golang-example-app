@@ -1,5 +1,3 @@
-# Air config for live reloading Go files but not restarting on HTML changes
-
 root = "."
 
 # Exclude these directories
@@ -7,20 +5,22 @@ ignore = ["tmp", "vendor", "node_modules", ".git", "logs"]
 
 # Watch Go files and restart on change
 [[watch]]
-  path = "."
-  includes = ["*.go", "**/*.go", "**/*.tmpl]
-  excludes = ["tmp/*", "vendor/*"]
+path = "."
+includes = ["*.go", "**/*.go", "**/*.tmpl"]
+excludes = ["tmp/*", "vendor/*", "*.html", "**/*.html"]
 
 # Watch static assets (CSS, JS, images) but restart is not needed
 [[watch]]
-  path = "assets"
-  includes = ["*"]
+path = "assets"
+includes = ["*"]
+cmd = ""  # No restart for static files
 
 # Watch HTML templates but don't restart Air on change
 [[watch]]
-  path = "views"
-  includes = ["*.html", "**/*.html"]
-  cmd = "" # This prevents Air from restarting on HTML changes
+path = "views"
+includes = ["*.html", "**/*.html"]
+excludes = ["*.html~"]  # ✅ Ignore temporary files (~ files created by editors)
+cmd = "echo 'HTML file changed, but no restart needed'"  # ✅ Prevents Air restart
 
 # Build command
 cmd = "go run main.go"

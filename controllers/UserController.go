@@ -19,35 +19,37 @@ func Index(c *gin.Context) {
 	var DataUsers []map[string]interface{}
 	for i, user := range users {
 		DataUsers = append(DataUsers, map[string]interface{}{
-			"Number": i + 1,
-			"Id":     user.Id,
-			"Name":   user.Name,
-			"Email":  user.Email,
+			"Number":   i + 1,
+			"Id":       user.Id,
+			"Name":     user.Name,
+			"Email":    user.Email,
+			"IsActive": user.IsActive,
 		})
 	}
 
 	// Retrieve flash messages from cookies
-	successMessage, _ := c.Cookie("SUCCESS_CREATE")
+	successCreate, _ := c.Cookie("SUCCESS_CREATE")
+	failedCreate, _ := c.Cookie("FAILED_CREATE")
+	successDelete, _ := c.Cookie("SUCCESS_DELETE")
+	failedDelete, _ := c.Cookie("FAILED_DELETE")
 	errorMessage, _ := c.Cookie("ERROR")
-	failedMessage, _ := c.Cookie("FAILED_CREATE")
 
 	// Clear the cookies after retrieving (so the message disappears after refresh)
 	c.SetCookie("SUCCESS_CREATE", "", -1, "/", "", false, true)
-	c.SetCookie("ERROR", "", -1, "/", "", false, true)
 	c.SetCookie("FAILED_CREATE", "", -1, "/", "", false, true)
+	c.SetCookie("SUCCESS_DELETE", "", -1, "/", "", false, true)
+	c.SetCookie("FAILED_DELETE", "", -1, "/", "", false, true)
+	c.SetCookie("ERROR", "", -1, "/", "", false, true)
 
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title":          "User List",
-		"users":          DataUsers,
-		"successMessage": successMessage,
-		"errorMessage":   errorMessage,
-		"failedMessage":  failedMessage,
+		"title":         "User List",
+		"users":         DataUsers,
+		"successCreate": successCreate,
+		"failedCreate":  failedCreate,
+		"successDelete": successDelete,
+		"failedDelete":  failedDelete,
+		"errorMessage":  errorMessage,
 	})
-
-	//c.HTML(http.StatusOK, "index.html", gin.H{
-	//	"title": "User List",
-	//	"users": DataUsers,
-	//})
 }
 
 func CreateUser(c *gin.Context) {
@@ -118,7 +120,7 @@ func ShowUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 	config.DB.First(&user, id)
-	c.HTML(http.StatusOK, "edit.html", gin.H{"user": user, "title": "Detail User"})
+	c.HTML(http.StatusOK, "/user/show.html", gin.H{"user": user, "title": "Detail User"})
 }
 
 func UpdateUser(c *gin.Context) {
@@ -137,6 +139,7 @@ func UpdateUser(c *gin.Context) {
 
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	config.DB.Delete(&models.User{}, id)
+	config.DB.Unscoped().Delete(&models.User{}, id)
+	c.SetCookie("SUCCESS_DELETE", "User successfully deleted", 3600, "/", "", false, true)
 	c.Redirect(http.StatusFound, "/")
 }

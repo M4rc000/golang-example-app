@@ -7,6 +7,7 @@ import (
 
 func main() {
 	config.ConnectionDB()
+	defer config.CloseDB()
 	routes.RunApp()
 	//config.Migrate()
 }

@@ -33,3 +33,11 @@ func ConnectionDB() {
 
 	DB = db
 }
+
+func CloseDB() {
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Println("Error getting DB object", err)
+	}
+	sqlDB.Close()
+}

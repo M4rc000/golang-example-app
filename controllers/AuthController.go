@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"golang-example-app/config"
@@ -9,59 +10,111 @@ import (
 )
 
 func Register(c *gin.Context) {
-	// Retrieve flash messages from cookies
-	successCreate, _ := c.Cookie("SUCCESS_CREATE")
-	failedCreate, _ := c.Cookie("FAILED_CREATE")
-	errorMessage, _ := c.Cookie("ERROR")
+	session := sessions.Default(c)
 
-	// Clear the cookies after retrieving (so the message disappears after refresh)
-	c.SetCookie("FAILED_CREATE", "", -1, "/auth/register", "", false, true)
-	c.SetCookie("ERROR", "", -1, "/auth/register", "", false, true)
+	// RETRIEVE FLASH MESSAGES
+	failedRegister := session.Get("FAILED_REGISTER")
+	errorInputData := session.Get("ERROR_INPUTDATA")
+	errorUsername := session.Get("ERROR_USERNAME")
+	errorName := session.Get("ERROR_NAME")
+	errorEmail := session.Get("ERROR_EMAIL")
+	errorPassword := session.Get("ERROR_PASSWORD")
+	duplicateEmail := session.Get("DUPLICATE_EMAIL")
+	duplicateUsername := session.Get("DUPLICATE_USERNAME")
+
+	//Clear flash messages (so the message disappears after refresh)
+	session.Delete("FAILED_REGISTER")
+	session.Delete("ERROR")
+	session.Delete("ERROR_USERNAME")
+	session.Delete("ERROR_NAME")
+	session.Delete("ERROR_EMAIL")
+	session.Delete("ERROR_PASSWORD")
+	session.Delete("DUPLICATE_EMAIL")
+	session.Delete("DUPLICATE_USERNAME")
+
+	session.Save()
 
 	c.HTML(http.StatusOK, "register.html", gin.H{
-		"title":         "Register",
-		"successCreate": successCreate,
-		"failedCreate":  failedCreate,
-		"errorMessage":  errorMessage,
+		"title":             "Register",
+		"failedRegister":    failedRegister,
+		"errorUsername":     errorUsername,
+		"errorName":         errorName,
+		"errorEmail":        errorEmail,
+		"errorPassword":     errorPassword,
+		"errorInputData":    errorInputData,
+		"duplicateEmail":    duplicateEmail,
+		"duplicateUsername": duplicateUsername,
+		"old": gin.H{
+			"Name":     c.DefaultQuery("Name", ""),
+			"Username": c.DefaultQuery("Username", ""),
+			"Email":    c.DefaultQuery("Email", ""),
+		},
 	})
 }
 
 func StoreRegister(c *gin.Context) {
+	session := sessions.Default(c)
 	var validate = validator.New()
 	var user models.User
+	var errors = make(map[string]string)
 
 	// Use ShouldBindJSON if receiving JSON requests
 	if err := c.ShouldBind(&user); err != nil {
-		c.SetCookie("ERROR", "Invalid input data", 3600, "/auth/register", "", false, false)
+		session.Set("ERROR_INPUTDATA", "Invalid input data")
+		session.Save()
 		c.Redirect(http.StatusFound, "/auth/register")
 		return
 	}
 
 	// Validate user struct
 	if err := validate.Struct(user); err != nil {
-		c.SetCookie("ERROR", err.Error(), 3600, "/auth/register", "", false, false)
+		for _, err := range err.(validator.ValidationErrors) {
+			switch err.Field() {
+			case "Email":
+				errors["ERROR_EMAIL"] = "Email must be a valid email address"
+			case "Username":
+				errors["ERROR_USERNAME"] = "Username must be a valid username"
+			case "Name":
+				errors["ERROR_NAME"] = "Name is required"
+			case "Password":
+				errors["ERROR_PASSWORD"] = "Password must be at least 8 characters!"
+			}
+		}
+
+		// Store errors in cookies
+		for key, msg := range errors {
+			session.Set(key, msg)
+			err := session.Save()
+			if err != nil {
+				c.JSON(http.StatusFound, gin.H{
+					"error": err.Error(),
+				})
+			}
+		}
+
+		// Redirect once after storing errors
 		c.Redirect(http.StatusFound, "/auth/register")
 		return
 	}
 
 	// Hash password before saving
 	if err := user.HashPassword(); err != nil {
-		c.SetCookie("ERROR", "Failed to hash password", 3600, "/auth/register", "", false, false)
+		session.Set("ERROR", "Failed to hash password")
+		session.Save()
 		c.Redirect(http.StatusFound, "/auth/register")
 		return
 	}
 
-	// Check unique email
+	// Check for duplicate email or username in a single query
 	var existingUser models.User
-	if err := config.DB.Where("email = ?", user.Email).First(&existingUser).Error; err == nil {
-		c.SetCookie("ERROR", "Email already exists", 3600, "/auth/register", "", false, false)
-		c.Redirect(http.StatusFound, "/auth/register")
-		return
-	}
-
-	// Check unique username
-	if err := config.DB.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
-		c.SetCookie("ERROR", "Username already exists", 3600, "/auth/register", "", false, false)
+	if err := config.DB.Where("email = ? OR username = ?", user.Email, user.Username).First(&existingUser).Error; err == nil {
+		if existingUser.Email == user.Email {
+			session.Set("DUPLICATE_EMAIL", "Email already exists")
+		}
+		if existingUser.Username == user.Username {
+			session.Set("DUPLICATE_USERNAME", "Username already exists")
+		}
+		session.Save()
 		c.Redirect(http.StatusFound, "/auth/register")
 		return
 	}
@@ -71,46 +124,67 @@ func StoreRegister(c *gin.Context) {
 
 	// Save user to database
 	if err := config.DB.Create(&user).Error; err != nil {
-		c.SetCookie("FAILED_REGISTER", "Failed to create user", 3600, "/auth/register", "", false, false)
+		session.Set("FAILED_REGISTER", "Failed to create user")
+		session.Save()
 		c.Redirect(http.StatusFound, "/auth/register")
 		return
 	}
 
-	c.SetCookie("SUCCESS_REGISTER", "Registration successful", 3600, "/auth", "", false, false)
-	c.Redirect(http.StatusFound, "/auth")
+	session.Set("SUCCESS_REGISTER", "Registration successful")
+	session.Save()
+	c.Redirect(http.StatusFound, "/auth/")
 }
 
 func Login(c *gin.Context) {
-	successCreate, _ := c.Cookie("SUCCESS_CREATE")
-	c.SetCookie("SUCCESS_CREATE", "", -1, "/auth/", "", false, true)
+	session := sessions.Default(c)
+	successRegister := session.Get("SUCCESS_REGISTER")
+	loginError := session.Get("LOGIN_ERROR")
+
+	session.Delete("LOGIN_ERROR")
+	session.Delete("SUCCESS_REGISTER")
+
+	session.Save()
+
 	c.HTML(http.StatusFound, "login.html", gin.H{
-		"title":         "Login",
-		"successCreate": successCreate,
+		"title":           "Login",
+		"successRegister": successRegister,
+		"loginError":      loginError,
 	})
 }
 
 func Authenticate(c *gin.Context) {
+	session := sessions.Default(c)
+
 	var request struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
+		EmailUsername string `form:"email-username" binding:"required"`
+		Password      string `form:"password" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+	if err := c.ShouldBind(&request); err != nil {
+		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
+		session.Save()
+		c.Redirect(http.StatusFound, "/auth/")
 		return
 	}
 
 	var user models.User
-	if err := config.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+	result := config.DB.Where("email = ? OR username = ?", request.EmailUsername, request.EmailUsername).First(&user)
+	if result.Error != nil {
+		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
+		session.Save()
+		c.Redirect(http.StatusFound, "/auth/")
 		return
 	}
 
-	// Check password
 	if !user.CheckPassword(request.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
+		session.Save()
+		c.Redirect(http.StatusFound, "/auth/")
 		return
 	}
 
-	// TODO: Generate JWT token (future step)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	// Authentication successful
+	session.Set("USER_ID", user.ID) // Store user ID in session
+	session.Save()
+	c.Redirect(http.StatusFound, "/home/dashboard")
 }

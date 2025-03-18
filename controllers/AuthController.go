@@ -184,7 +184,15 @@ func Authenticate(c *gin.Context) {
 	}
 
 	// Authentication successful
-	session.Set("USER_ID", user.ID) // Store user ID in session
+	session.Set("USER_ID", user.ID)
+	session.Set("USER_EMAIL_USERNAME", request.EmailUsername) // Store email/username
 	session.Save()
 	c.Redirect(http.StatusFound, "/home/dashboard")
+}
+
+func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Save()
+	c.Redirect(http.StatusFound, "/auth/")
 }

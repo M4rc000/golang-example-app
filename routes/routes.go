@@ -3,11 +3,11 @@ package routes
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
 	"golang-example-app/controllers"
+	"golang-example-app/middlewares"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 func RunApp() {
@@ -22,23 +22,37 @@ func RunApp() {
 	app.Static("/assets", "./assets")
 	app.LoadHTMLGlob("views/**/*")
 
-	// AUTHENTICATION
 	app.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/auth/")
+		c.Redirect(http.StatusFound, "/auth")
 	})
-	app.GET("/auth/", controllers.Login)
-	app.POST("/auth/", controllers.Authenticate)
-	app.GET("/auth/register", controllers.Register)
-	app.POST("/auth/register", controllers.StoreRegister)
-	//app.GET("/auth/forgot-password", controllers.ForgotPassword)
 
-	//app.GET("/", controllers.Index)
-	app.GET("/users/create", controllers.CreateUser)
-	app.POST("/users/create", controllers.StoreUser)
-	app.GET("/users/edit/:id", controllers.EditUser)
-	app.GET("/users/show/:id", controllers.ShowUser)
-	app.POST("/users/update/:id", controllers.UpdateUser)
-	app.GET("/users/delete/:id", controllers.DeleteUser)
+	// AUTHENTICATION
+	authGroup := app.Group("/auth")
+	{
+		authGroup.Use(middlewares.GuestRequired)
+		authGroup.GET("", controllers.Login)
+		authGroup.POST("", controllers.Authenticate)
+		app.GET("/register", controllers.Register)
+		app.POST("/register", controllers.StoreRegister)
+	}
+
+	// HOME
+	homeGroup := app.Group("/home")
+	{
+		homeGroup.Use(middlewares.AuthRequired)
+		homeGroup.GET("/", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/home/dashboard")
+		})
+		homeGroup.GET("/dashboard", controllers.Dashboard)
+		homeGroup.GET("/users/create", controllers.CreateUser)
+		homeGroup.POST("/users/create", controllers.StoreUser)
+		homeGroup.GET("/users/edit/:id", controllers.EditUser)
+		homeGroup.GET("/users/show/:id", controllers.ShowUser)
+		homeGroup.POST("/users/update/:id", controllers.UpdateUser)
+		homeGroup.GET("/users/delete/:id", controllers.DeleteUser)
+	}
+
+	app.GET("/logout", controllers.Logout)
 
 	err := app.Run(":8000")
 	if err != nil {

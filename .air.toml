@@ -7,7 +7,7 @@ ignore = ["tmp", "vendor", "node_modules", ".git", "logs"]
 [[watch]]
 path = "."
 includes = ["*.go", "**/*.go", "**/*.tmpl"]
-excludes = ["tmp/*", "vendor/*", "*.html", "**/*.html"]
+excludes = ["tmp/*", "vendor/*"]
 
 # Watch static assets (CSS, JS, images) but restart is not needed
 [[watch]]
@@ -19,7 +19,7 @@ cmd = ""  # No restart for static files
 [[watch]]
 path = "views"
 includes = ["*.html", "**/*.html"]
-excludes = ["*.html~"]  # ✅ Ignore temporary files (~ files created by editors)
+excludes = []  # ✅ Ignore temporary files (~ files created by editors)
 cmd = "echo 'HTML file changed, but no restart needed'"  # ✅ Prevents Air restart
 
 # Build command

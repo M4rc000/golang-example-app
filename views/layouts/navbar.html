@@ -51,7 +51,7 @@
             <div class="dropdown-divider"></div>
           </li>
           <li>
-            <a class="dropdown-item" href="#">
+            <a class="dropdown-item" href="/user/profile">
               <i class="bx bx-user me-2"></i>
               <span class="align-middle">My Profile</span>
             </a>
@@ -92,11 +92,4 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
   <!-- Content -->
-  <nav class="mt-3 mb-1 mx-4" aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="javascript:void(0);">Home</a>
-      </li>
-      <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
-  </nav>
+  <h4 class="fw-bold py-3 mb-2 mt-2" style="margin-left: 2rem; margin-right: 2rem"><span class="text-muted fw-light">{{ .menu }} /</span> {{ .submenu }}</h4>

@@ -3,6 +3,8 @@ package controllers
 import (
 	"github.com/go-playground/validator/v10"
 	"golang-example-app/config"
+	"golang-example-app/helpers"
+	"golang-example-app/middlewares"
 	"golang-example-app/models"
 	"net/http"
 	"strings"
@@ -10,6 +12,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+func UserProfile(c *gin.Context) {
+	userSession := middlewares.GetSessionUser(c)
+	URL := strings.Split(c.Request.URL.Path, "/")
+	menu := URL[1]
+	submenu := URL[2]
+
+	c.HTML(http.StatusFound, "profile.html", gin.H{
+		"title":   "User Profile",
+		"menu":    helpers.Proper(menu),
+		"submenu": helpers.Proper(submenu),
+		"user":    userSession,
+	})
+}
 
 func Index(c *gin.Context) {
 	var users []models.User

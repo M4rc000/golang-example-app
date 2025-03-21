@@ -44,15 +44,22 @@ func RunApp() {
 			c.Redirect(http.StatusFound, "/home/dashboard")
 		})
 		homeGroup.GET("/dashboard", controllers.Dashboard)
-		homeGroup.GET("/users/create", controllers.CreateUser)
-		homeGroup.POST("/users/create", controllers.StoreUser)
-		homeGroup.GET("/users/edit/:id", controllers.EditUser)
-		homeGroup.GET("/users/show/:id", controllers.ShowUser)
-		homeGroup.POST("/users/update/:id", controllers.UpdateUser)
-		homeGroup.GET("/users/delete/:id", controllers.DeleteUser)
+		homeGroup.GET("/logout", controllers.Logout)
 	}
 
-	app.GET("/logout", controllers.Logout)
+	userGroup := app.Group("/user")
+	{
+		userGroup.Use(middlewares.AuthRequired)
+		userGroup.GET("/profile", controllers.UserProfile)
+		userGroup.GET("/settings", controllers.CreateUser)
+
+		//userGroup.GET("/users/create", controllers.CreateUser)
+		//userGroup.POST("/users/create", controllers.StoreUser)
+		//userGroup.GET("/users/edit/:id", controllers.EditUser)
+		//userGroup.GET("/users/show/:id", controllers.ShowUser)
+		//userGroup.POST("/users/update/:id", controllers.UpdateUser)
+		//userGroup.GET("/users/delete/:id", controllers.DeleteUser)
+	}
 
 	err := app.Run(":8000")
 	if err != nil {

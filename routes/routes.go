@@ -27,13 +27,16 @@ func RunApp() {
 	})
 
 	// AUTHENTICATION
+	// AUTHENTICATION
 	authGroup := app.Group("/auth")
 	{
 		authGroup.Use(middlewares.GuestRequired)
 		authGroup.GET("", controllers.Login)
 		authGroup.POST("", controllers.Authenticate)
-		app.GET("/register", controllers.Register)
-		app.POST("/register", controllers.StoreRegister)
+
+		// Move register routes inside auth group
+		authGroup.GET("/register", controllers.Register)
+		authGroup.POST("/register", controllers.StoreRegister)
 	}
 
 	// HOME
@@ -51,17 +54,11 @@ func RunApp() {
 	{
 		userGroup.Use(middlewares.AuthRequired)
 		userGroup.GET("/profile", controllers.UserProfile)
+		userGroup.POST("/profile", controllers.UpdateUserProfile)
 		userGroup.GET("/settings", controllers.CreateUser)
-
-		//userGroup.GET("/users/create", controllers.CreateUser)
-		//userGroup.POST("/users/create", controllers.StoreUser)
-		//userGroup.GET("/users/edit/:id", controllers.EditUser)
-		//userGroup.GET("/users/show/:id", controllers.ShowUser)
-		//userGroup.POST("/users/update/:id", controllers.UpdateUser)
-		//userGroup.GET("/users/delete/:id", controllers.DeleteUser)
 	}
 
-	err := app.Run(":8000")
+	err := app.Run(":3000")
 	if err != nil {
 		log.Fatal("Application failed to run")
 	}

@@ -22,73 +22,87 @@
             </ul>
             <div class="card mb-4">
                 <h5 class="card-header">Profile Details</h5>
+                <form id="formAccountSettings" method="POST" action="/user/profile">
                 <!-- Account -->
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
                         <img
-                                src="../assets/img/avatars/1.png"
+                                src="/assets/img/{{.user.Picture}}"
                                 alt="user-avatar"
-                                class="d-block rounded"
+                                class="d-block rounded {{ if .errorPicture }}is-invalid{{ end }}"
                                 height="100"
                                 width="100"
-                                id="uploadedAvatar"
+                                id="Picture"
+                                name="Picture"
                         />
                         <div class="button-wrapper">
                             <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
                                 <span class="d-none d-sm-block">Upload new photo</span>
                                 <i class="bx bx-upload d-block d-sm-none"></i>
-                                <input
-                                        type="file"
-                                        id="upload"
-                                        class="account-file-input"
-                                        hidden
-                                        accept="image/png, image/jpeg"
-                                />
+                                <input type="file" id="upload" name="Picture" class="account-file-input"
+                                       accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none" onchange="preview_image()"/>
                             </label>
                             <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
                                 <i class="bx bx-reset d-block d-sm-none"></i>
                                 <span class="d-none d-sm-block">Reset</span>
                             </button>
 
-                            <p class="text-muted mb-0">Allowed JPG, GIF or PNG. Max size of 800K</p>
+                            <p class="text-muted mb-0">Allowed WEBP, JPG, JPEG or PNG. Max size of 1 MB</p>
                         </div>
+                    </div>
+                    <div class="text-danger">
+                        <span>{{.errorPicture}}</span>
                     </div>
                 </div>
                 <hr class="my-0" />
                 <div class="card-body">
-                    <form id="formAccountSettings" method="POST" onsubmit="return false">
                         <div class="row">
                             <div class="mb-3 col-md-6">
                                 <label for="Name" class="form-label">Name</label>
                                 <input
-                                        class="form-control"
+                                        class="form-control {{ if .errorName }}is-invalid{{ end }}"
                                         type="text"
                                         id="Name"
                                         name="Name"
                                         value="{{.user.Name}}"
                                         autofocus
                                 />
+                                <div class="text-danger">
+                                    <span>{{.errorName}}</span>
+                                </div>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label for="Username" class="form-label">Username</label>
                                 <input
-                                        class="form-control"
+                                        class="form-control {{if .errorUsername}}is-invalid{{end}} {{if .duplicateUsername}}is-invalid{{end}}"
                                         type="text"
                                         id="Username"
                                         name="Username"
                                         value="{{.user.Username}}"
                                 />
+                                <div class="text-danger">
+                                    <span>{{.errorUsername}}</span>
+                                </div>
+                                <div class="text-danger">
+                                    <span>{{.duplicateUsername}}</span>
+                                </div>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label for="Email" class="form-label">E-mail</label>
                                 <input
-                                        class="form-control"
+                                        class="form-control {{if .errorEmail}}is-invalid{{end}} {{if .duplicateEmail}}is-invalid{{end}}"
                                         type="text"
                                         id="Email"
                                         name="Email"
                                         value="{{ .user.Email }}"
                                         placeholder="john.doe@example.com"
                                 />
+                                <div class="text-danger">
+                                    <span>{{.errorEmail}}</span>
+                                </div>
+                                <div class="text-danger">
+                                    <span>{{.duplicateEmail}}</span>
+                                </div>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label for="Gender" class="form-label">Gender</label>
@@ -100,41 +114,32 @@
                                         value="{{ .user.Gender }}"
                                 />
                             </div>
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label class="form-label" for="phoneNumber">Phone Number</label>-->
-<!--                                <div class="input-group input-group-merge">-->
-<!--                                    <span class="input-group-text">US (+1)</span>-->
-<!--                                    <input-->
-<!--                                            type="text"-->
-<!--                                            id="phoneNumber"-->
-<!--                                            name="phoneNumber"-->
-<!--                                            class="form-control"-->
-<!--                                            placeholder="202 555 0111"-->
-<!--                                    />-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="address" class="form-label">Address</label>-->
-<!--                                <input type="text" class="form-control" id="address" name="address" placeholder="Address" />-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="state" class="form-label">State</label>-->
-<!--                                <input class="form-control" type="text" id="state" name="state" placeholder="California" />-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="zipCode" class="form-label">Zip Code</label>-->
-<!--                                <input-->
-<!--                                        type="text"-->
-<!--                                        class="form-control"-->
-<!--                                        id="zipCode"-->
-<!--                                        name="zipCode"-->
-<!--                                        placeholder="231465"-->
-<!--                                        maxlength="6"-->
-<!--                                />-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label class="form-label" for="country">Country</label>-->
-<!--                                <select id="country" class="select2 form-select">-->
+                            <div class="mb-3 col-md-6">
+                                <label for="Address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="Address" name="Address" placeholder="Address" value="{{ .user.Address }}"/>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="PostalCode" class="form-label">Postal Code</label>
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="PostalCode"
+                                        name="PostalCode"
+                                        placeholder="231465"
+                                        maxlength="6"
+                                        value="{{.user.PostalCode}}"
+                                />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label" for="Country">Country</label>
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="Country"
+                                        name="Country"
+                                        value="{{.user.Country}}"
+                                />
+<!--                                <select id="Country" name="Country" class="select2 form-select">-->
 <!--                                    <option value="">Select</option>-->
 <!--                                    <option value="Australia">Australia</option>-->
 <!--                                    <option value="Bangladesh">Bangladesh</option>-->
@@ -161,88 +166,79 @@
 <!--                                    <option value="United Kingdom">United Kingdom</option>-->
 <!--                                    <option value="United States">United States</option>-->
 <!--                                </select>-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="language" class="form-label">Language</label>-->
-<!--                                <select id="language" class="select2 form-select">-->
-<!--                                    <option value="">Select Language</option>-->
-<!--                                    <option value="en">English</option>-->
-<!--                                    <option value="fr">French</option>-->
-<!--                                    <option value="de">German</option>-->
-<!--                                    <option value="pt">Portuguese</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="timeZones" class="form-label">Timezone</label>-->
-<!--                                <select id="timeZones" class="select2 form-select">-->
-<!--                                    <option value="">Select Timezone</option>-->
-<!--                                    <option value="-12">(GMT-12:00) International Date Line West</option>-->
-<!--                                    <option value="-11">(GMT-11:00) Midway Island, Samoa</option>-->
-<!--                                    <option value="-10">(GMT-10:00) Hawaii</option>-->
-<!--                                    <option value="-9">(GMT-09:00) Alaska</option>-->
-<!--                                    <option value="-8">(GMT-08:00) Pacific Time (US & Canada)</option>-->
-<!--                                    <option value="-8">(GMT-08:00) Tijuana, Baja California</option>-->
-<!--                                    <option value="-7">(GMT-07:00) Arizona</option>-->
-<!--                                    <option value="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>-->
-<!--                                    <option value="-7">(GMT-07:00) Mountain Time (US & Canada)</option>-->
-<!--                                    <option value="-6">(GMT-06:00) Central America</option>-->
-<!--                                    <option value="-6">(GMT-06:00) Central Time (US & Canada)</option>-->
-<!--                                    <option value="-6">(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>-->
-<!--                                    <option value="-6">(GMT-06:00) Saskatchewan</option>-->
-<!--                                    <option value="-5">(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>-->
-<!--                                    <option value="-5">(GMT-05:00) Eastern Time (US & Canada)</option>-->
-<!--                                    <option value="-5">(GMT-05:00) Indiana (East)</option>-->
-<!--                                    <option value="-4">(GMT-04:00) Atlantic Time (Canada)</option>-->
-<!--                                    <option value="-4">(GMT-04:00) Caracas, La Paz</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                            <div class="mb-3 col-md-6">-->
-<!--                                <label for="currency" class="form-label">Currency</label>-->
-<!--                                <select id="currency" class="select2 form-select">-->
-<!--                                    <option value="">Select Currency</option>-->
-<!--                                    <option value="usd">USD</option>-->
-<!--                                    <option value="euro">Euro</option>-->
-<!--                                    <option value="pound">Pound</option>-->
-<!--                                    <option value="bitcoin">Bitcoin</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
+                            </div>
                         </div>
                         <div class="mt-2">
                             <button type="submit" class="btn btn-primary me-2">Save changes</button>
-                            <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                         </div>
                     </form>
                 </div>
                 <!-- /Account -->
-            </div>
-            <div class="card">
-                <h5 class="card-header">Delete Account</h5>
-                <div class="card-body">
-                    <div class="mb-3 col-12 mb-0">
-                        <div class="alert alert-warning">
-                            <h6 class="alert-heading fw-bold mb-1">Are you sure you want to delete your account?</h6>
-                            <p class="mb-0">Once you delete your account, there is no going back. Please be certain.</p>
-                        </div>
-                    </div>
-                    <form id="formAccountDeactivation" onsubmit="return false">
-                        <div class="form-check mb-3">
-                            <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="accountActivation"
-                                    id="accountActivation"
-                            />
-                            <label class="form-check-label" for="accountActivation"
-                            >I confirm my account deactivation</label
-                            >
-                        </div>
-                        <button type="submit" class="btn btn-danger deactivate-account">Deactivate Account</button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
 </div>
 {{ template "script.html" .}}
 
+{{ if .error }}
+<script>
+    Swal.fire({
+        title: "Error!",
+        text: `{{ .error }}`,
+        icon: "error",
+        width: "23em"
+    });
+</script>
+{{ end }}
+{{ if .failedUpdateProfile }}
+<script>
+    Swal.fire({
+        title: "Error!",
+        text: `{{ .failedUpdateProfile }}`,
+        icon: "error",
+        width: "23em"
+    });
+</script>
+{{ end }}
+{{ if .successUpdateProfile }}
+<script>
+    Swal.fire({
+        title: "Success!",
+        text: `{{ .successUpdateProfile }}`,
+        icon: "success",
+        width: "23em"
+    });
+</script>
+{{ end }}
+{{ if .errorPicture }}
+<script>
+    Swal.fire({
+        title: "Error!",
+        text: `{{ .errorPicture }}`,
+        icon: "error",
+        width: "23em"
+    });
+</script>
+{{ end }}
+
+<script>
+    $(document).ready(function(){
+        $('#Language').select2();
+    });
+
+    function preview_image() {
+        const fileInput = document.getElementById('upload');
+        const imagePreview = document.getElementById('Picture');
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    }
+</script>
 {{ template "footer.html" .}}

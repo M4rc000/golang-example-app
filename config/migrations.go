@@ -8,8 +8,12 @@ import (
 func Migrate() {
 	err := DB.AutoMigrate(&models.User{})
 	if err != nil {
-		fmt.Println("Migration failed")
-	} else {
-		fmt.Println("Migration Successfully")
+		fmt.Println("Migration failed", err)
+		return
+	}
+	err = DB.AutoMigrate(&models.Movie{})
+	if err != nil {
+		fmt.Println("Migration failed", err)
+		return
 	}
 }

@@ -7,14 +7,31 @@ import (
 
 type User struct {
 	gorm.Model
-	Id       int    `gorm:"primaryKey; autoIncrement"`
-	Email    string `gorm:"type:varchar(100); unique; not null" validate:"required,email,max=100"`
-	Username string `gorm:"type:varchar(100); unique; not null" validate:"required,max=100"`
-	Name     string `gorm:"type:varchar(100); not null" validate:"required,max=100"`
-	Password string `gorm:"type:varchar(255); not null" validate:"required,min=4"` // Store hashed password
-	Gender   string `gorm:"type:varchar(10); null"`
-	Picture  string `gorm:"type:varchar(255); null"`
-	IsActive int    `gorm:"type:int;default:0"`
+	Id         int    `gorm:"primaryKey; autoIncrement"`
+	Email      string `gorm:"type:varchar(100); unique; not null" form:"Email" json:"Email" validate:"required,email,max=100"`
+	Username   string `gorm:"type:varchar(100); unique; not null" form:"Username" json:"Username" validate:"required,max=100"`
+	Name       string `gorm:"type:varchar(100); not null" form:"Name" json:"Name" validate:"required,max=100"`
+	Password   string `gorm:"type:varchar(255); not null" form:"Password" json:"Password" validate:"required,min=4"` // Store hashed password
+	Gender     string `gorm:"type:varchar(10); null" form:"Gender" json:"Gender"`
+	Address    string `gorm:"type:varchar(255); null" form:"Address" json:"Address"`
+	PostalCode string `gorm:"type:varchar(10); null" form:"PostalCode" json:"PostalCode"`
+	Country    string `gorm:"type:varchar(100); null" form:"Country" json:"Country"`
+	Picture    string `gorm:"type:varchar(255); default:profile-user/default.png" form:"Picture" json:"Picture"`
+	IsActive   int    `gorm:"type:int;default:0"`
+}
+
+type UserProfile struct {
+	gorm.Model
+	Id         int    `gorm:"primaryKey; autoIncrement"`
+	Email      string `gorm:"type:varchar(100); unique; not null" form:"Email" json:"Email" validate:"required,email,max=100"`
+	Username   string `gorm:"type:varchar(100); unique; not null" form:"Username" json:"Username" validate:"required,max=100"`
+	Name       string `gorm:"type:varchar(100); not null" form:"Name" json:"Name" validate:"required,max=100"`
+	Gender     string `gorm:"type:varchar(10); null" form:"Gender" json:"Gender"`
+	Address    string `gorm:"type:varchar(255); null" form:"Address" json:"Address"`
+	PostalCode string `gorm:"type:varchar(10); null" form:"PostalCode" json:"PostalCode"`
+	Country    string `gorm:"type:varchar(100); null" form:"Country" json:"Country"`
+	Picture    string `gorm:"type:varchar(255); default:profile-user/default.png" form:"Picture" json:"Picture"`
+	IsActive   int    `gorm:"type:int;default:0"`
 }
 
 // HashPassword hashes the user's password before saving to the database

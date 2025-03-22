@@ -53,5 +53,19 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/assets/js/config.js"></script>
+    <style>
+        .select2-container {
+            z-index: 99;
+        }
+
+        .select2-selection {
+            padding-top: 4px !important;
+            height: 38px !important;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #d9dee3;
+        }
+    </style>
 </head>
 <body>

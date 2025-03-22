@@ -1,30 +1,206 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"golang-example-app/config"
 	"golang-example-app/helpers"
 	"golang-example-app/middlewares"
 	"golang-example-app/models"
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func UserProfile(c *gin.Context) {
 	userSession := middlewares.GetSessionUser(c)
-	URL := strings.Split(c.Request.URL.Path, "/")
-	menu := URL[1]
-	submenu := URL[2]
+	menu, submenu := helpers.GetMenuSubmenu(c)
 
-	c.HTML(http.StatusFound, "profile.html", gin.H{
-		"title":   "User Profile",
-		"menu":    helpers.Proper(menu),
-		"submenu": helpers.Proper(submenu),
-		"user":    userSession,
+	session := sessions.Default(c)
+	errorUpdateProfile := session.Get("ERROR_UPDATEPROFILE")
+	successUpdateProfile := session.Get("SUCCESS_UPDATEPROFILE")
+	failedUpdateProfile := session.Get("FAILED_UPDATEPROFILE")
+	errorUsername := session.Get("ERROR_USERNAME")
+	errorName := session.Get("ERROR_NAME")
+	errorEmail := session.Get("ERROR_EMAIL")
+	errorPicture := session.Get("ERROR_PICTURE")
+	duplicateEmail := session.Get("DUPLICATE_EMAIL")
+	duplicateUsername := session.Get("DUPLICATE_USERNAME")
+
+	session.Delete("ERROR_PICTURE")
+	session.Delete("ERROR_UPDATEPROFILE")
+	session.Delete("SUCCESS_UPDATEPROFILE")
+	session.Delete("FAILED_UPDATEPROFILE")
+	session.Delete("ERROR_USERNAME")
+	session.Delete("ERROR_NAME")
+	session.Delete("ERROR_EMAIL")
+	session.Delete("DUPLICATE_EMAIL")
+	session.Delete("DUPLICATE_USERNAME")
+
+	session.Save()
+
+	c.HTML(http.StatusOK, "profile.html", gin.H{
+		"title":                "User Profile",
+		"menu":                 menu,
+		"submenu":              submenu,
+		"user":                 userSession,
+		"successUpdateProfile": successUpdateProfile,
+		"failedUpdateProfile":  failedUpdateProfile,
+		"errorUsername":        errorUsername,
+		"errorName":            errorName,
+		"errorPicture":         errorPicture,
+		"error":                errorUpdateProfile,
+		"errorEmail":           errorEmail,
+		"duplicateEmail":       duplicateEmail,
+		"duplicateUsername":    duplicateUsername,
 	})
+}
+
+func UpdateUserProfile(c *gin.Context) {
+	userSession := middlewares.GetSessionUser(c)
+	session := sessions.Default(c)
+	var validate = validator.New()
+	var user models.UserProfile
+	var errors = make(map[string]string)
+
+	if err := c.ShouldBind(&user); err != nil {
+		log.Fatal(err)
+		session.Set("ERROR_UPDATEPROFILE", "Invalid input data")
+		session.Save()
+		c.Redirect(http.StatusFound, "/user/profile")
+		return
+	}
+
+	// Validate user struct
+	if err := validate.Struct(user); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			switch err.Field() {
+			case "Email":
+				errors["ERROR_EMAIL"] = "Email must be a valid email address"
+			case "Username":
+				errors["ERROR_USERNAME"] = "Username must be a valid username"
+			case "Name":
+				errors["ERROR_NAME"] = "Name is required"
+			}
+		}
+
+		// Store errors in cookies
+		for key, msg := range errors {
+			session.Set(key, msg)
+			err := session.Save()
+			if err != nil {
+				c.JSON(http.StatusFound, gin.H{
+					"error": err.Error(),
+				})
+			}
+		}
+
+		// Redirect once after storing errors
+		c.Redirect(http.StatusFound, "/user/profile")
+		return
+	}
+
+	// FILE UPLOAD
+	file, err := c.FormFile("Picture")
+	if err == nil { // If a file is uploaded
+		// Validate file type (allow only jpg, jpeg, png, webp)
+		allowedTypes := map[string]bool{
+			"image/jpeg": true,
+			"image/png":  true,
+			"image/jpg":  true,
+			"image/webp": true,
+		}
+		if !allowedTypes[file.Header.Get("Content-Type")] {
+			session.Set("ERROR_PICTURE", "Invalid file format. Only Webp, JPG and PNG are allowed.")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
+
+		// Generate unique filename
+		fileExt := filepath.Ext(file.Filename)                      // Get file extension (.jpg, .png)
+		newFilename := fmt.Sprintf("%d%s", userSession.ID, fileExt) // e.g., "1.jpg"
+
+		// Define the storage path (relative path recommended)
+		saveDir := "assets/img/profile-user"
+
+		// Create the directory if it doesn't exist
+		if err := os.MkdirAll(saveDir, os.ModePerm); err != nil {
+			log.Println("Error creating directory:", err)
+			session.Set("ERROR_PICTURE", "Failed to create directory for profile picture")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
+
+		// Save file to server
+		//if err := c.SaveUploadedFile(file, savePath); err != nil {
+		//	log.Println("Error saving file:", err)
+		//	session.Set("ERROR_PICTURE", "Failed to upload profile picture")
+		//	session.Save()
+		//	c.Redirect(http.StatusFound, "/user/profile")
+		//	return
+		//}
+
+		file, _ := c.FormFile("Picture")
+		c.SaveUploadedFile(file, "/assets/img/profile-user")
+
+		// Update user's picture field with the relative path for DB (e.g., "profile-user/1.jpg")
+		user.Picture = filepath.Join("profile-user", newFilename)
+	}
+
+	user.Picture = "profile-user/" + user.Picture
+	fmt.Println(user.Picture)
+
+	// CHECK DUPLICATE EMAIL OR USERNAME
+	var existingUser models.UserProfile
+
+	// Check username duplication (excluding current user)
+	if userSession.Username != user.Username {
+		if err := config.DB.Where("username = ? AND id != ?", user.Username, userSession.Id).First(&existingUser).Error; err == nil {
+			session.Set("DUPLICATE_USERNAME", "Username already exists")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
+	}
+
+	// Check email duplication (excluding current user)
+	if userSession.Email != user.Email {
+		if err := config.DB.Where("email = ? AND id != ?", user.Email, userSession.Id).First(&existingUser).Error; err == nil {
+			session.Set("DUPLICATE_EMAIL", "Email already exists")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
+	}
+
+	// Save Data Profile to Database
+	userID := userSession.Id
+	result := config.DB.Model(&models.User{}).Where("id = ?", userID).Updates(user)
+	if result.Error != nil {
+		log.Fatal(result.Error)
+		session.Set("FAILED_UPDATEPROFILE", "Failed to update user profile")
+		session.Save()
+		c.Redirect(http.StatusFound, "/user/profile")
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		session.Set("FAILED_UPDATEPROFILE", "No changes were made to the profile.")
+		session.Save()
+		c.Redirect(http.StatusFound, "/user/profile")
+		return
+	}
+
+	session.Set("SUCCESS_UPDATEPROFILE", "Profile successfully updated")
+	session.Save()
+	c.Redirect(http.StatusFound, "/user/profile")
 }
 
 func Index(c *gin.Context) {

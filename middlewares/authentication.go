@@ -31,8 +31,8 @@ func GuestRequired(c *gin.Context) {
 }
 
 func GetSessionUser(c *gin.Context) *models.User {
-	session := sessions.Default(c)
-	userEmailUsernameInterface := session.Get("USER_EMAIL_USERNAME")
+	sessionUser := sessions.Default(c)
+	userEmailUsernameInterface := sessionUser.Get("USER_EMAIL_USERNAME")
 
 	// Type assertion untuk memastikan userEmailUsername adalah string
 	userEmailUsername, ok := userEmailUsernameInterface.(string)

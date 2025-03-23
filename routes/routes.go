@@ -22,6 +22,9 @@ func RunApp() {
 	app.Static("/assets", "./assets")
 	app.LoadHTMLGlob("views/**/*")
 
+	// HANDLE NOT FOUND
+	app.NoRoute(controllers.NoFoundRoute)
+
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/auth")
 	})

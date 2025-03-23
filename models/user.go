@@ -30,7 +30,7 @@ type UserProfile struct {
 	Address    string `gorm:"type:varchar(255); null" form:"Address" json:"Address"`
 	PostalCode string `gorm:"type:varchar(10); null" form:"PostalCode" json:"PostalCode"`
 	Country    string `gorm:"type:varchar(100); null" form:"Country" json:"Country"`
-	Picture    string `gorm:"type:varchar(255); default:profile-user/default.png" form:"Picture" json:"Picture"`
+	Picture    string `gorm:"type:varchar(255); default:profile-user/default.png" form:"-" json:"-"`
 	IsActive   int    `gorm:"type:int;default:0"`
 }
 

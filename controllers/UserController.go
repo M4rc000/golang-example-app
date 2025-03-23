@@ -107,29 +107,38 @@ func UpdateUserProfile(c *gin.Context) {
 
 	// FILE UPLOAD
 	file, err := c.FormFile("Picture")
-	if err == nil { // If a file is uploaded
-		// Validate file type (allow only jpg, jpeg, png, webp)
+	picturePath := ""
+	if err == nil && file != nil {
+		// Validate file type.
 		allowedTypes := map[string]bool{
 			"image/jpeg": true,
 			"image/png":  true,
 			"image/jpg":  true,
 			"image/webp": true,
 		}
+
 		if !allowedTypes[file.Header.Get("Content-Type")] {
-			session.Set("ERROR_PICTURE", "Invalid file format. Only Webp, JPG and PNG are allowed.")
+			session.Set("ERROR_PICTURE", "Invalid file format. Only Webp, JPG, and PNG are allowed.")
 			session.Save()
 			c.Redirect(http.StatusFound, "/user/profile")
 			return
 		}
 
-		// Generate unique filename
-		fileExt := filepath.Ext(file.Filename)                      // Get file extension (.jpg, .png)
-		newFilename := fmt.Sprintf("%d%s", userSession.ID, fileExt) // e.g., "1.jpg"
+		if file.Size > 1048576 {
+			session.Set("ERROR_PICTURE", "File size exceeds maximum allowed limit of 1 MB")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
 
-		// Define the storage path (relative path recommended)
+		// Generate a new unique filename.
+		fileExt := filepath.Ext(file.Filename)
+		newFilename := fmt.Sprintf("%d%s", userSession.Id, fileExt)
+
+		// Define the destination directory.
 		saveDir := "assets/img/profile-user"
 
-		// Create the directory if it doesn't exist
+		// Create the directory if it doesn't exist.
 		if err := os.MkdirAll(saveDir, os.ModePerm); err != nil {
 			log.Println("Error creating directory:", err)
 			session.Set("ERROR_PICTURE", "Failed to create directory for profile picture")
@@ -138,24 +147,19 @@ func UpdateUserProfile(c *gin.Context) {
 			return
 		}
 
-		// Save file to server
-		//if err := c.SaveUploadedFile(file, savePath); err != nil {
-		//	log.Println("Error saving file:", err)
-		//	session.Set("ERROR_PICTURE", "Failed to upload profile picture")
-		//	session.Save()
-		//	c.Redirect(http.StatusFound, "/user/profile")
-		//	return
-		//}
+		// Create the full file destination path.
+		destinationPath := filepath.Join(saveDir, newFilename)
+		if err := c.SaveUploadedFile(file, destinationPath); err != nil {
+			log.Println("Error saving file:", err)
+			session.Set("ERROR_PICTURE", "Failed to upload profile picture")
+			session.Save()
+			c.Redirect(http.StatusFound, "/user/profile")
+			return
+		}
 
-		file, _ := c.FormFile("Picture")
-		c.SaveUploadedFile(file, "/assets/img/profile-user")
-
-		// Update user's picture field with the relative path for DB (e.g., "profile-user/1.jpg")
-		user.Picture = filepath.Join("profile-user", newFilename)
+		// Set the picturePath for the DB update (relative to your assets folder).
+		picturePath = filepath.ToSlash(filepath.Join("profile-user", newFilename))
 	}
-
-	user.Picture = "profile-user/" + user.Picture
-	fmt.Println(user.Picture)
 
 	// CHECK DUPLICATE EMAIL OR USERNAME
 	var existingUser models.UserProfile
@@ -180,17 +184,30 @@ func UpdateUserProfile(c *gin.Context) {
 		}
 	}
 
+	// Prepare the update struct. For fields that are not changing, you can retain the old values.
+	updates := models.UserProfile{
+		Name:       user.Name,
+		Email:      user.Email,
+		Username:   user.Username,
+		Gender:     user.Gender,
+		Address:    user.Address,
+		PostalCode: user.PostalCode,
+		Country:    user.Country,
+	}
+	if picturePath != "" {
+		updates.Picture = picturePath
+	}
+
 	// Save Data Profile to Database
 	userID := userSession.Id
-	result := config.DB.Model(&models.User{}).Where("id = ?", userID).Updates(user)
+	result := config.DB.Model(&models.User{}).Where("id = ?", userID).Updates(&updates)
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Println("Update error:", result.Error)
 		session.Set("FAILED_UPDATEPROFILE", "Failed to update user profile")
 		session.Save()
 		c.Redirect(http.StatusFound, "/user/profile")
 		return
 	}
-
 	if result.RowsAffected == 0 {
 		session.Set("FAILED_UPDATEPROFILE", "No changes were made to the profile.")
 		session.Save()

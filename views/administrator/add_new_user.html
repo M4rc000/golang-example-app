@@ -1,0 +1,101 @@
+{{ template "header.html" .}}
+{{ template "sidebar.html" .}}
+{{ template "navbar.html" .}}
+
+<style>
+  .card-img-top{
+    width: 230px !important;
+    height: 298px !important;
+  }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col mb-0">
+              <label for="Name" class="form-label">Name</label>
+              <input
+                      type="text"
+                      id="Name"
+                      name="Name"
+                      class="form-control"
+                      placeholder="Enter Name"
+              />
+            </div>
+            <div class="col mb-0">
+              <label for="Username" class="form-label">Username</label>
+              <input
+                      type="text"
+                      id="Username"
+                      name="Username"
+                      class="form-control"
+                      placeholder="Enter Username"
+                      required
+              />
+            </div>
+          </div>
+          <div class="row g-2 mt-2">
+            <div class="col mb-0">
+              <label for="Email" class="form-label">Email</label>
+              <input
+                      type="text"
+                      id="Email"
+                      name="Email"
+                      class="form-control"
+                      placeholder="example@gmail.com"
+                      required
+              />
+            </div>
+            <div class="col mb-0">
+              <label for="Gender" class="form-label">Gender</label>
+              <select class="form-select" id="Gender" name="Gender" aria-label="Default select example" required>
+                <option value="">Choose Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{{ template "script.html" }}
+
+{{ if .failedRegister }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .failedRegister }}`,
+    icon: "error",
+    width: "23em"
+  });
+</script>
+{{ end }}
+
+<script>
+  $(document).ready(function(){
+    $('#btn-show').on('click', function(){
+      $('#showModal').modal('show');
+      $('#showModalGender').select2();
+      const username = $(this).data('username');
+      const name = $(this).data('name');
+      const email = $(this).data('email');
+      const gender = $(this).data('gender');
+
+      $('#showModal').find('#showModalUsername').val(username);
+      $('#showModal').find('#showModalName').val(name);
+      $('#showModal').find('#showModalEmail').val(email);
+      $('#showModal').find('#showModalGender').val(gender).change();
+    });
+
+    // $('#btn-')
+  });
+</script>
+
+{{ template "footer.html" }}

@@ -21,28 +21,15 @@ func UserProfile(c *gin.Context) {
 	userSession := middlewares.GetSessionUser(c)
 	menu, submenu := helpers.GetMenuSubmenu(c)
 
-	session := sessions.Default(c)
-	errorUpdateProfile := session.Get("ERROR_UPDATEPROFILE")
-	successUpdateProfile := session.Get("SUCCESS_UPDATEPROFILE")
-	failedUpdateProfile := session.Get("FAILED_UPDATEPROFILE")
-	errorUsername := session.Get("ERROR_USERNAME")
-	errorName := session.Get("ERROR_NAME")
-	errorEmail := session.Get("ERROR_EMAIL")
-	errorPicture := session.Get("ERROR_PICTURE")
-	duplicateEmail := session.Get("DUPLICATE_EMAIL")
-	duplicateUsername := session.Get("DUPLICATE_USERNAME")
-
-	session.Delete("ERROR_PICTURE")
-	session.Delete("ERROR_UPDATEPROFILE")
-	session.Delete("SUCCESS_UPDATEPROFILE")
-	session.Delete("FAILED_UPDATEPROFILE")
-	session.Delete("ERROR_USERNAME")
-	session.Delete("ERROR_NAME")
-	session.Delete("ERROR_EMAIL")
-	session.Delete("DUPLICATE_EMAIL")
-	session.Delete("DUPLICATE_USERNAME")
-
-	session.Save()
+	errorUpdateProfile := helpers.FlashMessage(c, "ERROR_UPDATEPROFILE")
+	successUpdateProfile := helpers.FlashMessage(c, "SUCCESS_UPDATEPROFILE")
+	failedUpdateProfile := helpers.FlashMessage(c, "FAILED_UPDATEPROFILE")
+	errorUsername := helpers.FlashMessage(c, "ERROR_USERNAME")
+	errorName := helpers.FlashMessage(c, "ERROR_NAME")
+	errorEmail := helpers.FlashMessage(c, "ERROR_EMAIL")
+	errorPicture := helpers.FlashMessage(c, "ERROR_PICTURE")
+	duplicateEmail := helpers.FlashMessage(c, "DUPLICATE_EMAIL")
+	duplicateUsername := helpers.FlashMessage(c, "DUPLICATE_USERNAME")
 
 	c.HTML(http.StatusOK, "profile.html", gin.H{
 		"title":                "User Profile",

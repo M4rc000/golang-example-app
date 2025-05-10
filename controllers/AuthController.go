@@ -4,39 +4,29 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	csrf "github.com/utrack/gin-csrf"
 	"golang-example-app/config"
+	"golang-example-app/helpers"
 	"golang-example-app/models"
 	"net/http"
 )
 
 func Register(c *gin.Context) {
-	session := sessions.Default(c)
-
-	// RETRIEVE FLASH MESSAGES
-	failedRegister := session.Get("FAILED_REGISTER")
-	errorInputData := session.Get("ERROR_INPUTDATA")
-	errorUsername := session.Get("ERROR_USERNAME")
-	errorName := session.Get("ERROR_NAME")
-	errorEmail := session.Get("ERROR_EMAIL")
-	errorPassword := session.Get("ERROR_PASSWORD")
-	duplicateEmail := session.Get("DUPLICATE_EMAIL")
-	duplicateUsername := session.Get("DUPLICATE_USERNAME")
-
-	//Clear flash messages (so the message disappears after refresh)
-	session.Delete("FAILED_REGISTER")
-	session.Delete("ERROR")
-	session.Delete("ERROR_USERNAME")
-	session.Delete("ERROR_NAME")
-	session.Delete("ERROR_EMAIL")
-	session.Delete("ERROR_PASSWORD")
-	session.Delete("DUPLICATE_EMAIL")
-	session.Delete("DUPLICATE_USERNAME")
-
-	session.Save()
+	err := helpers.FlashMessage(c, "ERROR")
+	failedRegister := helpers.FlashMessage(c, "FAILED_REGISTER")
+	errorInputData := helpers.FlashMessage(c, "ERROR_INPUTDATA")
+	errorUsername := helpers.FlashMessage(c, "ERROR_USERNAME")
+	errorName := helpers.FlashMessage(c, "ERROR_NAME")
+	errorEmail := helpers.FlashMessage(c, "ERROR_EMAIL")
+	errorPassword := helpers.FlashMessage(c, "ERROR_PASSWORD")
+	duplicateEmail := helpers.FlashMessage(c, "DUPLICATE_EMAIL")
+	duplicateUsername := helpers.FlashMessage(c, "DUPLICATE_USERNAME")
 
 	c.HTML(http.StatusOK, "register.html", gin.H{
 		"title":             "Register",
+		"csrfToken":         csrf.GetToken(c),
 		"failedRegister":    failedRegister,
+		"err":               err,
 		"errorUsername":     errorUsername,
 		"errorName":         errorName,
 		"errorEmail":        errorEmail,
@@ -58,7 +48,6 @@ func StoreRegister(c *gin.Context) {
 	var user models.User
 	var errors = make(map[string]string)
 
-	// Use ShouldBindJSON if receiving JSON requests
 	if err := c.ShouldBind(&user); err != nil {
 		session.Set("ERROR_INPUTDATA", "Invalid input data")
 		session.Save()
@@ -86,9 +75,8 @@ func StoreRegister(c *gin.Context) {
 			session.Set(key, msg)
 			err := session.Save()
 			if err != nil {
-				c.JSON(http.StatusFound, gin.H{
-					"error": err.Error(),
-				})
+				session.Set("ERROR_INPUTDATA", err.Error())
+				session.Save()
 			}
 		}
 
@@ -136,17 +124,12 @@ func StoreRegister(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	session := sessions.Default(c)
-	successRegister := session.Get("SUCCESS_REGISTER")
-	loginError := session.Get("LOGIN_ERROR")
-
-	session.Delete("LOGIN_ERROR")
-	session.Delete("SUCCESS_REGISTER")
-
-	session.Save()
+	successRegister := helpers.FlashMessage(c, "SUCCESS_REGISTER")
+	loginError := helpers.FlashMessage(c, "LOGIN_ERROR")
 
 	c.HTML(http.StatusFound, "login.html", gin.H{
 		"title":           "Login",
+		"csrfToken":       csrf.GetToken(c),
 		"successRegister": successRegister,
 		"loginError":      loginError,
 	})
@@ -163,7 +146,7 @@ func Authenticate(c *gin.Context) {
 	if err := c.ShouldBind(&request); err != nil {
 		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
 		session.Save()
-		c.Redirect(http.StatusFound, "/auth/")
+		c.Redirect(http.StatusFound, "/auth")
 		return
 	}
 
@@ -172,22 +155,28 @@ func Authenticate(c *gin.Context) {
 	if result.Error != nil {
 		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
 		session.Save()
-		c.Redirect(http.StatusFound, "/auth/")
+		c.Redirect(http.StatusFound, "/auth")
 		return
 	}
 
 	if !user.CheckPassword(request.Password) {
 		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
 		session.Save()
-		c.Redirect(http.StatusFound, "/auth/")
+		c.Redirect(http.StatusFound, "/auth")
 		return
 	}
 
-	// Authentication successful
-	session.Set("USER_ID", user.ID)
-	session.Set("USER_EMAIL_USERNAME", request.EmailUsername) // Store email/username
+	userID := user.Id
+	userEmail := user.Email
+	userUsername := user.Username
+	session.Set("USER_ID", userID)
+	session.Set("USER_EMAIL", userEmail)
+	session.Set("USER_USERNAME", userUsername)
 	session.Save()
-	c.Redirect(http.StatusFound, "/home/dashboard")
+
+	// Authentication successful, Locate user based on access menu
+	firstAccessMenu := helpers.GetFirstAccessibleURL(config.DB, user.RoleID)
+	c.Redirect(http.StatusFound, firstAccessMenu)
 }
 
 func Logout(c *gin.Context) {

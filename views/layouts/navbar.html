@@ -14,7 +14,7 @@
       <li class="nav-item navbar-dropdown dropdown-user dropdown">
         <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online">
-            <img src="/assets/img/{{ .user.Picture}}" alt class="w-px-40 h-auto rounded-circle" />
+            <img src="/assets/img/{{ .user.Picture}}" alt class="w-px-40 h-auto rounded-circle" style="width: 40px !important; height: 40px !important;"/>
           </div>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
@@ -23,7 +23,7 @@
               <div class="d-flex">
                 <div class="flex-shrink-0 me-3">
                   <div class="avatar avatar-online">
-                    <img src="/assets/img/{{ .user.Picture}}" alt class="w-px-40 h-auto rounded-circle" />
+                    <img src="/assets/img/{{ .user.Picture}}" alt class="w-px-40 h-auto rounded-circle" style="width: 40px !important; height: 40px !important;"/>
                   </div>
                 </div>
                 <div class="flex-grow-1">
@@ -61,7 +61,7 @@
             <div class="dropdown-divider"></div>
           </li>
           <li>
-            <a class="dropdown-item" href="auth-login-basic.html">
+            <a class="dropdown-item" href="/user/logout">
               <i class="bx bx-power-off me-2"></i>
               <span class="align-middle">Log Out</span>
             </a>
@@ -78,4 +78,3 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
   <!-- Content -->
-  <h4 class="fw-bold py-3 mb-2 mt-2" style="margin-left: 2rem; margin-right: 2rem"><span class="text-muted fw-light">{{ .menu }} /</span> {{ .submenu }}</h4>

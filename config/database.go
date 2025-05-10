@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"golang-example-app/models"
 	"log"
 	"os"
 
@@ -30,6 +31,9 @@ func ConnectionDB() {
 	if err != nil {
 		log.Fatal("Failed to connect database:", err)
 	}
+
+	// Auto migrate models
+	db.AutoMigrate(&models.User{}, &models.User{}, &models.Menu{}, &models.SubMenu{}, &models.Role{}, &models.UserAccessMenu{}, &models.UserAccessSubmenu{})
 
 	DB = db
 }

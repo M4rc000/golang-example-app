@@ -19,6 +19,7 @@
                     <p class="mb-4">Make your app management easy and fun!</p>
 
                     <form id="formAuthentication" class="mb-3" action="/auth/register" method="POST">
+                        <input type="hidden" name="_csrf" value="{{.csrfToken}}">
                         <div class="mb-3">
                             <label for="Name" class="form-label">Name</label>
                             <input

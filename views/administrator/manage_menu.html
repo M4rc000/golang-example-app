@@ -1,0 +1,32 @@
+{{ template "header.html" .}}
+{{ template "sidebar.html" .}}
+{{ template "navbar.html" .}}
+
+<style>
+    .card-img-top{
+        width: 230px !important;
+        height: 298px !important;
+    }
+</style>
+
+<div class="container-xxl mt-4">
+    <h5 class="section px-2" style="border-left: 4px solid #6b6dfc">FILM TERBARU</h5>
+    <div class="row row-cols-1 row-cols-md-5 mb-5" style="gap: 5px">
+        <!--        {{ range .users }}-->
+        <div class="col">
+            <div class="card h-100" style="width: 230px !important">
+                <img class="card-img-top" src="/assets/img/elements/2.jpg" alt="Card image cap"/>
+                <div class="card-body">
+                    <h5 class="card-title text-center">Card title</h5>
+                    <p class="card-text text-center">
+                        2021
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!--        {{ end }}-->
+    </div>
+</div>
+
+{{ template "script.html" }}
+{{ template "footer.html" }}

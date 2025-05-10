@@ -1,54 +1,46 @@
 package middlewares
 
 import (
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang-example-app/config"
+	"golang-example-app/helpers"
 	"golang-example-app/models"
 	"net/http"
 )
 
 func AuthRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("USER_ID")
-	if userID == nil {
+	UserID := helpers.GetSessionValue(c, "USER_ID")
+	UserEmail := helpers.GetSessionValue(c, "USER_EMAIL")
+	UserUsername := helpers.GetSessionValue(c, "USER_USERNAME")
+
+	if UserID == "" || UserEmail == "" || UserUsername == "" {
 		c.Redirect(http.StatusFound, "/auth")
-		c.Abort()
-		return // Add return to prevent further execution
+		return
 	}
 	c.Next()
 }
 
 func GuestRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("USER_ID")
-	if userID != nil {
-		c.Redirect(http.StatusFound, "/home/dashboard")
-		c.Abort()
-		return // Add return to prevent further execution
+	UserID := helpers.GetSessionValue(c, "USER_ID")
+	UserEmail := helpers.GetSessionValue(c, "USER_EMAIL")
+	UserUsername := helpers.GetSessionValue(c, "USER_USERNAME")
+
+	if UserID == "" || UserEmail == "" || UserUsername == "" {
+		c.Redirect(http.StatusFound, "/administrator/dashboard")
+		return
 	}
 	c.Next()
 }
 
 func GetSessionUser(c *gin.Context) *models.User {
-	sessionUser := sessions.Default(c)
-	userEmailUsernameInterface := sessionUser.Get("USER_EMAIL_USERNAME")
-
-	// Type assertion untuk memastikan userEmailUsername adalah string
-	userEmailUsername, ok := userEmailUsernameInterface.(string)
-	if !ok {
-		// Handle error jika type assertion gagal
-		c.HTML(http.StatusUnauthorized, "error.html", gin.H{"error": "Unauthorized Access"})
-		c.Abort()
-		return nil
-	}
+	UserID := helpers.GetSessionValue(c, "USER_ID")
+	UserEmail := helpers.GetSessionValue(c, "USER_EMAIL")
+	UserUsername := helpers.GetSessionValue(c, "USER_USERNAME")
 
 	var user models.User
-	if err := config.DB.Where("email = ? OR username = ?", userEmailUsername, userEmailUsername).First(&user).Error; err != nil {
-		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "User not found"})
-		c.Abort()
+	if err := config.DB.Where("id = ? OR username = ? OR email = ?", UserID, UserUsername, UserEmail).First(&user).Error; err != nil {
+		c.Redirect(http.StatusFound, "/auth")
 		return nil
 	}
-
 	return &user
 }

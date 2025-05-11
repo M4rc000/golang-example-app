@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"unicode"
 )
@@ -120,8 +121,8 @@ func GetSessionValue(c *gin.Context, key string) interface{} {
 
 func EncodeID(id int) string {
 	hd := hashids.NewData()
-	hd.Salt = "your-secure-salt" // Use a strong, secret salt
-	hd.MinLength = 6             // Optional: Min length of encoded string
+	hd.Salt = os.Getenv("SALT")
+	hd.MinLength = 6 // Optional: Min length of encoded string
 	h, _ := hashids.NewWithData(hd)
 
 	e, _ := h.Encode([]int{id})
@@ -130,7 +131,7 @@ func EncodeID(id int) string {
 
 func DecodeID(encoded string) (int, error) {
 	hd := hashids.NewData()
-	hd.Salt = "your-secure-salt" // Same salt as above!
+	hd.Salt = os.Getenv("SALT")
 	hd.MinLength = 6
 	h, _ := hashids.NewWithData(hd)
 
@@ -162,6 +163,6 @@ func GetFirstAccessibleURL(db *gorm.DB, roleID int) string {
 
 func RedirectSlashRoute(url string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/"+url) // gunakan 302
+		c.Redirect(http.StatusFound, url)
 	}
 }

@@ -304,38 +304,3 @@ func StoreUser(c *gin.Context) {
 	c.SetCookie("SUCCESS_CREATE", "New user successfully created", 3600, "/", "", false, true)
 	c.Redirect(http.StatusFound, "/")
 }
-
-func EditUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	config.DB.First(&user, id)
-	c.HTML(http.StatusOK, "edit.html", gin.H{"user": user, "title": "Edit user"})
-}
-
-func ShowUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	config.DB.First(&user, id)
-	c.HTML(http.StatusOK, "/user/show.html", gin.H{"user": user, "title": "Detail User"})
-}
-
-func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
-	var user models.User
-	config.DB.First(&user, id)
-
-	if err := c.ShouldBind(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	config.DB.Save(&user)
-	c.Redirect(http.StatusFound, "/")
-}
-
-func DeleteUser(c *gin.Context) {
-	id := c.Param("id")
-	config.DB.Unscoped().Delete(&models.User{}, id)
-	c.SetCookie("SUCCESS_DELETE", "User successfully deleted", 3600, "/", "", false, true)
-	c.Redirect(http.StatusFound, "/")
-}

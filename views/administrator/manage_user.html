@@ -13,7 +13,7 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <a href="/admin/addNewUser">
+                <a href="/administrator/add-new-user">
                     <button class="btn btn-primary">New User</button>
                 </a>
             </div>
@@ -35,16 +35,16 @@
                             {{ range .DataUsers }}
                                 <tr>
                                     <td>{{.Number}}</td>
-                                    <td><img src="/assets/img/{{ .Picture}}" alt="{{.Username}}'s Picture" class="rounded-circle" width="20" height="20"></td>
+                                    <td class="text-center"><img src="/assets/img/{{ .Picture}}" alt="{{.Username}}'s Picture" class="rounded-circle" width="20" height="20"></td>
                                     <td>{{.Name}}</td>
                                     <td>{{.Username}}</td>
                                     <td>{{.Email}}</td>
                                     <td>{{.Gender}}</td>
                                     <td class="text-center">
-                                        <a href="#" id="btn-show" style="text-decoration: none" data-name="{{.Name}}" data-username="{{.Username}}" data-email="{{.Email}}" data-gender="{{.Gender}}">
+                                        <a href="/administrator/show-user/{{.Id}}" style="text-decoration: none" data-name="{{.Name}}" data-username="{{.Username}}" data-email="{{.Email}}" data-gender="{{.Gender}}">
                                             <span class="badge rounded-pill bg-success">Show</span>
                                         </a>
-                                        <a href="#" id="btn-edit" style="text-decoration: none" data-bs-toggle="modal"
+                                        <a href="/administrator/edit-user/{{.Id}}" style="text-decoration: none" data-bs-toggle="modal"
                                            data-bs-target="#editModal">
                                             <span class="badge rounded-pill bg-warning">Edit</span>
                                         </a>
@@ -63,79 +63,13 @@
     </div>
 </div>
 
-<!-- Show Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1">
+<!-- Edit Modal -->
+<div class="modal fade" id="EditModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form class="modal-content">
+        <form class="modal-content" method="post" action="/administrator/update-user">
+            <input type="hidden" name="_csrf" value="{{.csrfToken}}">
             <div class="modal-header">
-                <h5 class="modal-title" id="showModalTitle">Detail User</h5>
-                <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                ></button>
-            </div>
-            <div class="modal-body">
-                <div class="row g-2">
-                    <div class="col mb-0">
-                        <label for="showModalName" class="form-label">Name</label>
-                        <input
-                                type="text"
-                                id="showModalName"
-                                name="Name"
-                                class="form-control"
-                                placeholder="Enter Name"
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="showModalUsername" class="form-label">Username</label>
-                        <input
-                                type="text"
-                                id="showModalUsername"
-                                name="Username"
-                                class="form-control"
-                                placeholder="Enter Username"
-                        />
-                    </div>
-                </div>
-                <div class="row g-2 mt-2">
-                    <div class="col mb-0">
-                        <label for="showModalEmail" class="form-label">Email</label>
-                        <input
-                                type="text"
-                                id="showModalEmail"
-                                name="Email"
-                                class="form-control"
-                                placeholder="example@gmail.com"
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="showModalGender" class="form-label">Gender</label>
-                        <select class="form-select" id="showModalGender" name="Gender" aria-label="Default select example" required>
-                            <option value="">Choose Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Close
-                </button>
-                <button type="button" class="btn btn-primary">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Create Modal -->
-<div class="modal fade" id="createModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form class="modal-content" action="/admin/save-user" method="post">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createModalTitle">New User</h5>
+                <h5 class="modal-title" id="editModalTitle">Update User</h5>
                 <button
                         type="button"
                         class="btn-close"
@@ -187,61 +121,21 @@
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Close
-                </button>
-                <button type="button" class="btn btn-primary">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalTitle">Modal title</h5>
-                <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                ></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBackdrop" class="form-label">Name</label>
+                    <div class="col mb-0">
+                        <label for="Country" class="form-label">Country</label>
                         <input
                                 type="text"
-                                id="nameBackdrop"
+                                id="Country"
+                                name="Country"
                                 class="form-control"
-                                placeholder="Enter Name"
+                                required
                         />
                     </div>
                 </div>
-                <div class="row g-2">
+                <div class="row g-2 mt-2">
                     <div class="col mb-0">
-                        <label for="emailBackdrop" class="form-label">Email</label>
-                        <input
-                                type="text"
-                                id="emailBackdrop"
-                                class="form-control"
-                                placeholder="xxxx@xxx.xx"
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="dobBackdrop" class="form-label">DOB</label>
-                        <input
-                                type="text"
-                                id="dobBackdrop"
-                                class="form-control"
-                                placeholder="DD / MM / YY"
-                        />
+                        <label for="Address" class="form-label">Example textarea</label>
+                        <textarea class="form-control" id="Address" rows="3" cols="5" style="resize: none"></textarea>
                     </div>
                 </div>
             </div>
@@ -256,7 +150,7 @@
 </div>
 
 <!-- Delete Modal -->
-<div class="modal fade" id="deleteModal" data-bs-backdrop="static" tabindex="-1">
+<div class="modal fade" id="DeleteModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form class="modal-content">
             <div class="modal-header">
@@ -313,31 +207,51 @@
 
 {{ template "script.html" }}
 
-{{ if .failedRegister }}
+{{ if .successRegister }}
 <script>
     Swal.fire({
-        title: "Error!",
-        text: `{{ .failedRegister }}`,
-        icon: "error",
-        width: "23em"
+        title: "Success",
+        text: `{{ .successRegister }}`,
+        icon: "success",
+        width: "20em",
+        timer: 3500,
+        showConfirmButton: false
     });
 </script>
 {{ end }}
 
 <script>
     $(document).ready(function(){
+        $('#CreateModal').on('shown.bs.modal', function () {
+            $('#GenderCreateModal').select2({
+                dropdownParent: $('#CreateModal')
+            });
+        });
+
+        $('#ShowModal').on('shown.bs.modal', function () {
+            $('#GenderShowModal').select2({
+                dropdownParent: $('#ShowModal')
+            });
+        });
+
+        $('#CreateModal').on('shown.bs.modal', function () {
+            $('#GenderCreateModal').select2({
+                dropdownParent: $('#CreateModal')
+            });
+        });
+
         $('#btn-show').on('click', function(){
-           $('#showModal').modal('show');
-           $('#showModalGender').select2();
+           $('#ShowModal').modal('show');
+           $('#ShowModalGender').select2();
            const username = $(this).data('username');
            const name = $(this).data('name');
            const email = $(this).data('email');
            const gender = $(this).data('gender');
 
-            $('#showModal').find('#showModalUsername').val(username);
-            $('#showModal').find('#showModalName').val(name);
-            $('#showModal').find('#showModalEmail').val(email);
-            $('#showModal').find('#showModalGender').val(gender).change();
+            $('#ShowModal').find('#ShowModalUsername').val(username);
+            $('#ShowModal').find('#ShowModalName').val(name);
+            $('#ShowModal').find('#ShowModalEmail').val(email);
+            $('#ShowModal').find('#ShowModalGender').val(gender).change();
         });
 
         // $('#btn-')

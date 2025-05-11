@@ -6,130 +6,130 @@
         <div class="col-md-12">
             <form id="formAccountSettings" method="POST" action="/user/profile" enctype="multipart/form-data">
                 <div class="card mb-4">
-                <h5 class="card-header">Profile Details</h5>
-                <!-- Account -->
-                <div class="card-body">
-                    <div class="d-flex align-items-start align-items-sm-center gap-4">
-                        <img
-                                src="/assets/img/{{.user.Picture}}"
-                                alt="user-avatar"
-                                class="d-block rounded {{ if .errorPicture }}is-invalid{{ end }}"
-                                height="100"
-                                width="100"
-                                id="Picture"
-                        />
-                        <div class="button-wrapper">
-                            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
-                                <span class="d-none d-sm-block">Upload new photo</span>
-                                <i class="bx bx-upload d-block d-sm-none"></i>
-                                <input type="file" id="upload" name="Picture" class="account-file-input"
-                                       accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none" onchange="preview_image()"/>
-                            </label>
-                            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
-                                <i class="bx bx-reset d-block d-sm-none"></i>
-                                <span class="d-none d-sm-block">Reset</span>
-                            </button>
+                    <h5 class="card-header">Profile Details</h5>
+                    <!-- Account -->
+                    <div class="card-body">
+                        <div class="d-flex align-items-start align-items-sm-center gap-4">
+                            <img
+                                    src="/assets/img/{{.user.Picture}}"
+                                    alt="user-avatar"
+                                    class="d-block rounded {{ if .errorPicture }}is-invalid{{ end }}"
+                                    height="100"
+                                    width="100"
+                                    id="Picture"
+                            />
+                            <div class="button-wrapper">
+                                <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                                    <span class="d-none d-sm-block">Upload new photo</span>
+                                    <i class="bx bx-upload d-block d-sm-none"></i>
+                                    <input type="file" id="upload" name="Picture" class="account-file-input"
+                                           accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none" onchange="preview_image()"/>
+                                </label>
+                                <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+                                    <i class="bx bx-reset d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Reset</span>
+                                </button>
 
-                            <p class="text-muted mb-0">Allowed WEBP, JPG, JPEG or PNG. Max size of 1 MB</p>
+                                <p class="text-muted mb-0">Allowed WEBP, JPG, JPEG or PNG. Max size of 1 MB</p>
+                            </div>
+                        </div>
+                        <div class="text-danger pt-1">
+                            <span>{{.errorPicture}}</span>
                         </div>
                     </div>
-                    <div class="text-danger pt-1">
-                        <span>{{.errorPicture}}</span>
+                    <hr class="my-0" />
+                    <div class="card-body">
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    <label for="Name" class="form-label">Name</label>
+                                    <input
+                                            class="form-control {{ if .errorName }}is-invalid{{ end }}"
+                                            type="text"
+                                            id="Name"
+                                            name="Name"
+                                            value="{{.user.Name}}"
+                                            autofocus
+                                    />
+                                    <div class="text-danger">
+                                        <span>{{.errorName}}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="Username" class="form-label">Username</label>
+                                    <input
+                                            class="form-control {{if .errorUsername}}is-invalid{{end}} {{if .duplicateUsername}}is-invalid{{end}}"
+                                            type="text"
+                                            id="Username"
+                                            name="Username"
+                                            value="{{.user.Username}}"
+                                    />
+                                    <div class="text-danger">
+                                        <span>{{.errorUsername}}</span>
+                                    </div>
+                                    <div class="text-danger">
+                                        <span>{{.duplicateUsername}}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="Email" class="form-label">E-mail</label>
+                                    <input
+                                            class="form-control {{if .errorEmail}}is-invalid{{end}} {{if .duplicateEmail}}is-invalid{{end}}"
+                                            type="text"
+                                            id="Email"
+                                            name="Email"
+                                            value="{{ .user.Email }}"
+                                            placeholder="john.doe@example.com"
+                                    />
+                                    <div class="text-danger">
+                                        <span>{{.errorEmail}}</span>
+                                    </div>
+                                    <div class="text-danger">
+                                        <span>{{.duplicateEmail}}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="Gender" class="form-label">Gender</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="Gender"
+                                            name="Gender"
+                                            value="{{ .user.Gender }}"
+                                    />
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="Address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="Address" name="Address" placeholder="Address" value="{{ .user.Address }}"/>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="PostalCode" class="form-label">Postal Code</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="PostalCode"
+                                            name="PostalCode"
+                                            placeholder="231465"
+                                            maxlength="6"
+                                            value="{{.user.PostalCode}}"
+                                    />
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label" for="Country">Country</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            id="Country"
+                                            name="Country"
+                                            value="{{.user.Country}}"
+                                    />
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                            </div>
                     </div>
+                    <!-- /Account -->
                 </div>
-                <hr class="my-0" />
-                <div class="card-body">
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label for="Name" class="form-label">Name</label>
-                                <input
-                                        class="form-control {{ if .errorName }}is-invalid{{ end }}"
-                                        type="text"
-                                        id="Name"
-                                        name="Name"
-                                        value="{{.user.Name}}"
-                                        autofocus
-                                />
-                                <div class="text-danger">
-                                    <span>{{.errorName}}</span>
-                                </div>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="Username" class="form-label">Username</label>
-                                <input
-                                        class="form-control {{if .errorUsername}}is-invalid{{end}} {{if .duplicateUsername}}is-invalid{{end}}"
-                                        type="text"
-                                        id="Username"
-                                        name="Username"
-                                        value="{{.user.Username}}"
-                                />
-                                <div class="text-danger">
-                                    <span>{{.errorUsername}}</span>
-                                </div>
-                                <div class="text-danger">
-                                    <span>{{.duplicateUsername}}</span>
-                                </div>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="Email" class="form-label">E-mail</label>
-                                <input
-                                        class="form-control {{if .errorEmail}}is-invalid{{end}} {{if .duplicateEmail}}is-invalid{{end}}"
-                                        type="text"
-                                        id="Email"
-                                        name="Email"
-                                        value="{{ .user.Email }}"
-                                        placeholder="john.doe@example.com"
-                                />
-                                <div class="text-danger">
-                                    <span>{{.errorEmail}}</span>
-                                </div>
-                                <div class="text-danger">
-                                    <span>{{.duplicateEmail}}</span>
-                                </div>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="Gender" class="form-label">Gender</label>
-                                <input
-                                        type="text"
-                                        class="form-control"
-                                        id="Gender"
-                                        name="Gender"
-                                        value="{{ .user.Gender }}"
-                                />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="Address" class="form-label">Address</label>
-                                <input type="text" class="form-control" id="Address" name="Address" placeholder="Address" value="{{ .user.Address }}"/>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="PostalCode" class="form-label">Postal Code</label>
-                                <input
-                                        type="text"
-                                        class="form-control"
-                                        id="PostalCode"
-                                        name="PostalCode"
-                                        placeholder="231465"
-                                        maxlength="6"
-                                        value="{{.user.PostalCode}}"
-                                />
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="Country">Country</label>
-                                <input
-                                        type="text"
-                                        class="form-control"
-                                        id="Country"
-                                        name="Country"
-                                        value="{{.user.Country}}"
-                                />
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary me-2">Save changes</button>
-                        </div>
-                </div>
-                <!-- /Account -->
-            </div>
             </form>
         </div>
     </div>

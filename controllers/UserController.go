@@ -19,7 +19,8 @@ import (
 
 func UserProfile(c *gin.Context) {
 	userSession := middlewares.GetSessionUser(c)
-	menu, submenu := helpers.GetMenuSubmenu(c)
+	menu, _ := helpers.GetMenuSubmenu(c)
+	menus := helpers.GetSidebarMenusByRole(config.DB, userSession.RoleID)
 
 	errorUpdateProfile := helpers.FlashMessage(c, "ERROR_UPDATEPROFILE")
 	successUpdateProfile := helpers.FlashMessage(c, "SUCCESS_UPDATEPROFILE")
@@ -34,7 +35,7 @@ func UserProfile(c *gin.Context) {
 	c.HTML(http.StatusOK, "profile.html", gin.H{
 		"title":                "User Profile",
 		"menu":                 menu,
-		"submenu":              submenu,
+		"menus":                menus,
 		"user":                 userSession,
 		"successUpdateProfile": successUpdateProfile,
 		"failedUpdateProfile":  failedUpdateProfile,

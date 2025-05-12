@@ -41,20 +41,18 @@
                                     <td>{{.Email}}</td>
                                     <td>{{.Gender}}</td>
                                     <td class="text-center">
-                                        <a href="/administrator/show-user/{{.Id}}" style="text-decoration: none" data-name="{{.Name}}" data-username="{{.Username}}" data-email="{{.Email}}" data-gender="{{.Gender}}">
+                                        <a href="/administrator/show-user/{{.Id}}" style="text-decoration: none">
                                             <span class="badge rounded-pill bg-success">Show</span>
                                         </a>
-                                        <a href="/administrator/edit-user/{{.Id}}" style="text-decoration: none" data-bs-toggle="modal"
-                                           data-bs-target="#editModal">
+                                        <a href="/administrator/edit-user/{{.Id}}" style="text-decoration: none">
                                             <span class="badge rounded-pill bg-warning">Edit</span>
                                         </a>
-                                        <a href="#" id="btn-delete" style="text-decoration: none" data-bs-toggle="modal"
-                                           data-bs-target="#deleteModal">
+                                        <a href="#" id="btn-delete" style="text-decoration: none" data-id="{{.Id}}" data-username="{{.Username}}">
                                             <span class="badge rounded-pill bg-danger">Delete</span>
                                         </a>
                                     </td>
                                 </tr>
-                             {{ end }}
+                            {{ end }}
                         </tbody>
                     </table>
                 </div>
@@ -63,98 +61,13 @@
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div class="modal fade" id="EditModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form class="modal-content" method="post" action="/administrator/update-user">
-            <input type="hidden" name="_csrf" value="{{.csrfToken}}">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalTitle">Update User</h5>
-                <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                ></button>
-            </div>
-            <div class="modal-body">
-                <div class="row g-2">
-                    <div class="col mb-0">
-                        <label for="Name" class="form-label">Name</label>
-                        <input
-                                type="text"
-                                id="Name"
-                                name="Name"
-                                class="form-control"
-                                placeholder="Enter Name"
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="Username" class="form-label">Username</label>
-                        <input
-                                type="text"
-                                id="Username"
-                                name="Username"
-                                class="form-control"
-                                placeholder="Enter Username"
-                                required
-                        />
-                    </div>
-                </div>
-                <div class="row g-2 mt-2">
-                    <div class="col mb-0">
-                        <label for="Email" class="form-label">Email</label>
-                        <input
-                                type="text"
-                                id="Email"
-                                name="Email"
-                                class="form-control"
-                                placeholder="example@gmail.com"
-                                required
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="Gender" class="form-label">Gender</label>
-                        <select class="form-select" id="Gender" name="Gender" aria-label="Default select example" required>
-                            <option value="">Choose Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <div class="col mb-0">
-                        <label for="Country" class="form-label">Country</label>
-                        <input
-                                type="text"
-                                id="Country"
-                                name="Country"
-                                class="form-control"
-                                required
-                        />
-                    </div>
-                </div>
-                <div class="row g-2 mt-2">
-                    <div class="col mb-0">
-                        <label for="Address" class="form-label">Example textarea</label>
-                        <textarea class="form-control" id="Address" rows="3" cols="5" style="resize: none"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Close
-                </button>
-                <button type="button" class="btn btn-primary">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Delete Modal -->
 <div class="modal fade" id="DeleteModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form class="modal-content">
+        <form id="DeleteForm" class="modal-content" method="post" action="/administrator/delete-user/">
+            <input type="hidden" name="_csrf" value="{{.csrfToken}}">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalTitle">Modal title</h5>
+                <h5 class="modal-title" id="deleteModalTitle">Delete User</h5>
                 <button
                         type="button"
                         class="btn-close"
@@ -165,41 +78,15 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col mb-3">
-                        <label for="nameBackdrop" class="form-label">Name</label>
-                        <input
-                                type="text"
-                                id="nameBackdrop"
-                                class="form-control"
-                                placeholder="Enter Name"
-                        />
-                    </div>
-                </div>
-                <div class="row g-2">
-                    <div class="col mb-0">
-                        <label for="emailBackdrop" class="form-label">Email</label>
-                        <input
-                                type="text"
-                                id="emailBackdrop"
-                                class="form-control"
-                                placeholder="xxxx@xxx.xx"
-                        />
-                    </div>
-                    <div class="col mb-0">
-                        <label for="dobBackdrop" class="form-label">DOB</label>
-                        <input
-                                type="text"
-                                id="dobBackdrop"
-                                class="form-control"
-                                placeholder="DD / MM / YY"
-                        />
+                        Do you want to delete this user: <span id="username-delete"></span> ?
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Close
+                    Cancel
                 </button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Yes</button>
             </div>
         </form>
     </div>
@@ -214,48 +101,55 @@
         text: `{{ .successRegister }}`,
         icon: "success",
         width: "20em",
-        timer: 3500,
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+{{ end }}
+
+{{ if .successUpdate }}
+<script>
+    Swal.fire({
+        title: "Success",
+        text: `{{ .successUpdate }}`,
+        icon: "success",
+        width: "20em",
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+{{ end }}
+
+{{ if .successDelete }}
+<script>
+    Swal.fire({
+        title: "Success",
+        text: `{{ .successDelete }}`,
+        icon: "success",
+        width: "20em",
+        timer: 3000,
         showConfirmButton: false
     });
 </script>
 {{ end }}
 
 <script>
-    $(document).ready(function(){
-        $('#CreateModal').on('shown.bs.modal', function () {
-            $('#GenderCreateModal').select2({
-                dropdownParent: $('#CreateModal')
-            });
+    $(document).ready(function () {
+        $(document).on('click', '#btn-delete', function () {
+            $('#DeleteModal').modal('show');
+            var encodedId = $(this).data('id');
+            var username = $(this).data('username');
+
+            console.log("Username:",username)
+
+            // Set the form action dynamically
+            $('#DeleteForm').attr('action', '/administrator/delete-user/' + encodedId);
+
+            // Clear any existing username and insert the new one
+            $('#username-delete').html(`<span>${username}</span>`);
         });
-
-        $('#ShowModal').on('shown.bs.modal', function () {
-            $('#GenderShowModal').select2({
-                dropdownParent: $('#ShowModal')
-            });
-        });
-
-        $('#CreateModal').on('shown.bs.modal', function () {
-            $('#GenderCreateModal').select2({
-                dropdownParent: $('#CreateModal')
-            });
-        });
-
-        $('#btn-show').on('click', function(){
-           $('#ShowModal').modal('show');
-           $('#ShowModalGender').select2();
-           const username = $(this).data('username');
-           const name = $(this).data('name');
-           const email = $(this).data('email');
-           const gender = $(this).data('gender');
-
-            $('#ShowModal').find('#ShowModalUsername').val(username);
-            $('#ShowModal').find('#ShowModalName').val(name);
-            $('#ShowModal').find('#ShowModalEmail').val(email);
-            $('#ShowModal').find('#ShowModalGender').val(gender).change();
-        });
-
-        // $('#btn-')
     });
 </script>
+
 
 {{ template "footer.html" }}

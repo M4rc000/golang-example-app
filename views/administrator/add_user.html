@@ -1,0 +1,192 @@
+{{ template "header.html" .}}
+{{ template "sidebar.html" .}}
+{{ template "navbar.html" .}}
+
+<style>
+  .select2-container {
+    z-index: 99;
+  }
+
+  .select2-selection {
+    padding-top: 4px !important;
+    height: 38px !important;
+  }
+
+  .select2-container--default .select2-selection--single {
+    border: 1px solid #d9dee3;
+  }
+
+  option{
+    color: #767d85 !important;
+  }
+</style>
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="col">
+    <div class="card">
+      <div class="card-content">
+        <form action="/administrator/save-user" method="post">
+          <input type="hidden" name="_csrf" value="{{.csrfToken}}">
+          <div class="card-header">
+            <div class="card-body">
+              <div class="row">
+                <div class="mb-3 col-md-4">
+                  <label for="Name" class="form-label">Name</label>
+                  <input
+                          class="form-control {{ if .errorName }}is-invalid{{ end }}"
+                          type="text"
+                          id="Name"
+                          name="Name"
+                          value="{{.oldName}}"
+                          required
+                          autofocus
+                  />
+                  <div class="text-danger">
+                    <span>{{.errorName}}</span>
+                  </div>
+                </div>
+                <div class="mb-3 col-md-4">
+                  <label for="Username" class="form-label">Username</label>
+                  <input
+                          class="form-control {{ if .errorUsername }}is-invalid{{ end }}"
+                          type="text"
+                          id="Username"
+                          name="Username"
+                          value="{{.oldUsername}}"
+                          required
+                  />
+                  <div class="text-danger">
+                    <span>{{.errorUsername}}</span>
+                  </div>
+                </div>
+              <div class="mb-3 col-md-4 form-password-toggle">
+                  <label for="Password" class="form-label">Password</label>
+                  <div class="input-group input-group-merge">
+                    <input
+                            type="password"
+                            id="Password"
+                            class="form-control {{if .errorPassword}}is-invalid{{end}}"
+                            name="Password"
+                            placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                            aria-describedby="password"
+                            required
+                    />
+                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                  </div>
+                  <div class="text-danger">
+                      <span>{{.errorPassword}}</span>
+                  </div>
+              </div>
+                <div class="mb-3 col-md-4">
+                  <label for="Email" class="form-label">E-mail</label>
+                  <input
+                          class="form-control {{ if .errorEmail }}is-invalid{{ end }}"
+                          type="text"
+                          id="Email"
+                          name="Email"
+                          value="{{.oldEmail}}"
+                          required
+                  />
+                  <div class="text-danger">
+                    <span>{{.errorEmail}}</span>
+                  </div>
+                </div>
+                <div class="mb-3 col-md-4">
+                  <label for="Gender" class="form-label">Gender</label>
+                  <select class="form-select {{ if .errorGender }}is-invalid{{ end }}" id="Gender" name="Gender" aria-label="Default select example" required>
+                    <option value="">Choose a gender</option>
+                      <option value="Male" {{ if eq .oldGender "Male" }}selected{{ end }}>Male</option>
+                      <option value="Female" {{ if eq .oldGender "Female" }}selected{{ end }}>Female</option>
+                  </select>
+                  <div class="text-danger">
+                    <span>{{.errorGender}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col text-end">
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{{ template "script.html" }}
+
+{{ if .failedRegister }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .failedRegister }}`,
+    icon: "error",
+    width: "20em",
+    timer: 3000,
+    showConfirmButton: false
+  });
+</script>
+{{ end }}
+
+{{ if .errorInputData }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .errorInputData }}`,
+    icon: "error",
+    width: "20em",
+    timer: 3000,
+    showConfirmButton: false
+  });
+</script>
+{{ end }}
+
+{{ if .duplicateEmail }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .duplicateEmail }}`,
+    icon: "error",
+    width: "20em",
+    timer: 3000,
+    showConfirmButton: false
+  });
+</script>
+{{ end }}
+
+{{ if .duplicateUsername }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .duplicateUsername }}`,
+    icon: "error",
+    width: "20em",
+    timer: 3000,
+    showConfirmButton: false
+  });
+</script>
+{{ end }}
+
+{{ if .err }}
+<script>
+  Swal.fire({
+    title: "Error!",
+    text: `{{ .err }}`,
+    icon: "error",
+    width: "20em",
+    timer: 3000,
+    showConfirmButton: false
+  });
+</script>
+{{ end }}
+
+<script>
+  $(document).ready(function(){
+    $('#Gender').select2();
+  });
+</script>
+
+{{ template "footer.html" }}

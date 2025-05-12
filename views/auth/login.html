@@ -76,7 +76,9 @@
         title: "Success",
         text: `{{ .successRegister }}`,
         icon: "success",
-        width: "20em"
+        width: "20em",
+        timer: 3000,
+        showConfirmButton: false
     });
 </script>
 {{ end }}
@@ -86,7 +88,9 @@
         title: "Error",
         text: `{{ .loginError }}`,
         icon: "error",
-        width: "20em"
+        width: "20em",
+        timer: 3000,
+        showConfirmButton: false
     });
 </script>
 {{ end }}

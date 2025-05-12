@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -86,7 +87,8 @@ func StoreRegister(c *gin.Context) {
 	}
 
 	// Hash password before saving
-	if err := user.HashPassword(); err != nil {
+	password, err := helpers.HashPassword(user.Password)
+	if err != nil {
 		session.Set("ERROR", "Failed to hash password")
 		session.Save()
 		c.Redirect(http.StatusFound, "/auth/register")
@@ -109,6 +111,7 @@ func StoreRegister(c *gin.Context) {
 
 	// Activate the user
 	user.IsActive = 1
+	user.Password = password
 
 	// Save user to database
 	if err := config.DB.Create(&user).Error; err != nil {
@@ -150,6 +153,8 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("Username: %s, Password: %s", request.EmailUsername, request.Password)
+
 	var user models.User
 	result := config.DB.Where("email = ? OR username = ?", request.EmailUsername, request.EmailUsername).First(&user)
 	if result.Error != nil {
@@ -159,7 +164,8 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	if !user.CheckPassword(request.Password) {
+	password := helpers.CheckPasswordHash(request.Password, user.Password)
+	if !password {
 		session.Set("LOGIN_ERROR", "Invalid email/username or password.")
 		session.Save()
 		c.Redirect(http.StatusFound, "/auth")

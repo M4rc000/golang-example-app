@@ -25,8 +25,8 @@ func GuestRequired(c *gin.Context) {
 	UserEmail := helpers.GetSessionValue(c, "USER_EMAIL")
 	UserUsername := helpers.GetSessionValue(c, "USER_USERNAME")
 
-	if UserID == "" || UserEmail == "" || UserUsername == "" {
-		c.Redirect(http.StatusFound, "/administrator/dashboard")
+	if UserID != "" || UserEmail != "" || UserUsername != "" {
+		c.Redirect(http.StatusFound, "/administrator")
 		return
 	}
 	c.Next()

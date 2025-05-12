@@ -43,13 +43,12 @@ func RunApp() {
 			return a == b
 		},
 	}).ParseGlob("views/**/*"))
-
 	app.SetHTMLTemplate(tmpl)
 
 	// HANDLE NOT FOUND
 	app.NoRoute(controllers.NoFoundRoute)
 
-	app.GET("/", helpers.RedirectSlashRoute("auth"))
+	app.GET("/", helpers.RedirectSlashRoute("/auth"))
 
 	// AUTHENTICATION
 	authGroup := app.Group("/auth")
@@ -71,12 +70,35 @@ func RunApp() {
 		administratorGroup.GET("/manage-user", controllers.ManageUser)
 		administratorGroup.GET("/add-new-user", controllers.AddNewUser)
 		administratorGroup.POST("/save-user", controllers.SaveNewUser)
-		administratorGroup.GET("/edit-user", controllers.EditUser)
-		administratorGroup.POST("/update-user", controllers.UpdateUser)
+		administratorGroup.GET("/edit-user/:id", controllers.EditUser)
+		administratorGroup.POST("/update-user/:id", controllers.UpdateUser)
+		administratorGroup.POST("/delete-user/:id", controllers.DeleteUser)
 		administratorGroup.GET("/show-user/:id", controllers.ShowUser)
+
 		administratorGroup.GET("/manage-role", controllers.ManageRole)
+		administratorGroup.GET("/add-new-role", controllers.AddNewRole)
+		administratorGroup.POST("/save-role", controllers.SaveNewRole)
+		administratorGroup.GET("/edit-role/:id", controllers.EditRole)
+		administratorGroup.POST("/update-role/:id", controllers.UpdateRole)
+		administratorGroup.POST("/delete-role/:id", controllers.DeleteRole)
+		administratorGroup.GET("/show-role/:id", controllers.ShowRole)
+
 		administratorGroup.GET("/manage-menu", controllers.ManageMenu)
+
+		administratorGroup.GET("/add-new-menu", controllers.AddNewMenu)
+		administratorGroup.POST("/save-menu", controllers.SaveNewMenu)
+		administratorGroup.GET("/edit-menu/:id", controllers.EditMenu)
+		administratorGroup.POST("/update-menu/:id", controllers.UpdateMenu)
+		administratorGroup.POST("/delete-menu/:id", controllers.DeleteMenu)
+		administratorGroup.GET("/show-menu/:id", controllers.ShowMenu)
+
 		administratorGroup.GET("/manage-submenu", controllers.ManageSubmenu)
+		administratorGroup.GET("/add-new-submenu", controllers.AddNewSubmenu)
+		administratorGroup.POST("/save-submenu", controllers.SaveNewSubmenu)
+		administratorGroup.GET("/edit-submenu/:id", controllers.ShowSubmenu)
+		administratorGroup.POST("/update-submenu/:id", controllers.UpdateSubmenu)
+		administratorGroup.POST("/delete-submenu/:id", controllers.DeleteSubmenu)
+		administratorGroup.GET("/show-submenu/:id", controllers.ShowSubmenu)
 	}
 
 	// DASHBOARD
